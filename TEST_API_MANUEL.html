@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API Navipad</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+        .config {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .config-item {
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .config-label {
+            font-weight: bold;
+            color: #666;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .loading {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0,0,0,.1);
+            border-radius: 50%;
+            border-top-color: #007bff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .summary-card {
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .summary-card.success {
+            background: #d4edda;
+        }
+        .summary-card.error {
+            background: #f8d7da;
+        }
+        .summary-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+        }
+        .summary-card .value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Test API Navipad</h1>
+        
+        <div class="config">
+            <div class="config-item">
+                <span class="config-label">URL de base:</span>
+                <span id="baseUrl">https://navipad-superbase.vercel.app</span>
+            </div>
+            <div class="config-item">
+                <span class="config-label">Clé API:</span>
+                <span id="apiKey">88abf96eead6f01f632b98a6315f64a8c09d084b1ba43917ca1d4591581cd95d</span>
+            </div>
+        </div>
+
+        <div>
+            <button onclick="testAllEndpoints()">🚀 Tester Tous les Endpoints</button>
+            <button onclick="testMapData()">📍 Tester Map Data</button>
+            <button onclick="testAmodiataires()">👥 Tester Amodiataires</button>
+            <button onclick="testZoneBounds()">🗺️ Tester Zone Bounds</button>
+            <button onclick="clearResults()">🗑️ Effacer</button>
+        </div>
+
+        <div id="summary" class="summary" style="display: none;"></div>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const BASE_URL = 'https://navipad-superbase.vercel.app';
+        const API_KEY = '88abf96eead6f01f632b98a6315f64a8c09d084b1ba43917ca1d4591581cd95d';
+
+        let testResults = [];
+
+        async function testEndpoint(name, url) {
+            const startTime = Date.now();
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'result loading';
+            resultDiv.innerHTML = `<div class="spinner"></div> Test en cours: ${name}...`;
+            document.getElementById('results').appendChild(resultDiv);
+
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'x-api-key': API_KEY,
+                        'Accept': 'application/json',
+                    },
+                });
+
+                const duration = Date.now() - startTime;
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+✅ ${name} - SUCCÈS
+Status: ${response.status}
+Durée: ${duration}ms
+URL: ${url}
+
+Données reçues:
+${JSON.stringify(data, null, 2).substring(0, 500)}${JSON.stringify(data).length > 500 ? '...' : ''}
+                    `;
+                    testResults.push({ name, success: true, duration, status: response.status });
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `
+❌ ${name} - ÉCHEC
+Status: ${response.status} ${response.statusText}
+Durée: ${duration}ms
+URL: ${url}
+
+Erreur:
+${JSON.stringify(data, null, 2)}
+                    `;
+                    testResults.push({ name, success: false, duration, status: response.status, error: data });
+                }
+            } catch (error) {
+                const duration = Date.now() - startTime;
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+❌ ${name} - ERREUR DE CONNEXION
+Durée: ${duration}ms
+URL: ${url}
+
+Erreur:
+${error.message}
+
+Causes possibles:
+- Serveur hors ligne
+- Problème de connexion internet
+- CORS bloqué (si test depuis navigateur)
+- URL incorrecte
+                `;
+                testResults.push({ name, success: false, duration, error: error.message });
+            }
+        }
+
+        async function testMapData() {
+            testResults = [];
+            await testEndpoint('Map Data', `${BASE_URL}/api/public/map/all`);
+            updateSummary();
+        }
+
+        async function testAmodiataires() {
+            testResults = [];
+            await testEndpoint('Amodiataires', `${BASE_URL}/api/mobile/public/amodiataires?limit=1`);
+            updateSummary();
+        }
+
+        async function testZoneBounds() {
+            testResults = [];
+            await testEndpoint('Zone Bounds', `${BASE_URL}/api/geolocation/zone-bounds`);
+            updateSummary();
+        }
+
+        async function testAllEndpoints() {
+            testResults = [];
+            document.getElementById('results').innerHTML = '';
+            
+            await testEndpoint('Map Data', `${BASE_URL}/api/public/map/all`);
+            await testEndpoint('Amodiataires', `${BASE_URL}/api/mobile/public/amodiataires?limit=1`);
+            await testEndpoint('Zone Bounds', `${BASE_URL}/api/geolocation/zone-bounds`);
+            
+            updateSummary();
+        }
+
+        function updateSummary() {
+            const summaryDiv = document.getElementById('summary');
+            const successCount = testResults.filter(r => r.success).length;
+            const totalCount = testResults.length;
+            const avgDuration = testResults.reduce((sum, r) => sum + r.duration, 0) / totalCount;
+
+            summaryDiv.style.display = 'grid';
+            summaryDiv.innerHTML = `
+                <div class="summary-card ${successCount === totalCount ? 'success' : 'error'}">
+                    <h3>Tests Réussis</h3>
+                    <div class="value">${successCount}/${totalCount}</div>
+                </div>
+                <div class="summary-card">
+                    <h3>Durée Moyenne</h3>
+                    <div class="value">${Math.round(avgDuration)}ms</div>
+                </div>
+            `;
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('summary').style.display = 'none';
+            testResults = [];
+        }
+
+        // Message d'information
+        console.log('🔍 Test API Navipad');
+        console.log('Pour tester les endpoints, cliquez sur les boutons ci-dessus.');
+        console.log('');
+        console.log('Note: Si vous testez depuis un navigateur, vous pourriez rencontrer des erreurs CORS.');
+        console.log('Dans ce cas, utilisez le script Node.js: node scripts/test-api-connection.js');
+    </script>
+</body>
+</html>

@@ -1,0 +1,425 @@
+{
+    "app": {
+        "name": "Navipad",
+        "tagline": "Votre compagnon de navigation"
+    },
+    "calculator": {
+        "title": "Calculateur",
+        "pickOrigin": "Départ",
+        "useCurrentLocation": "Utiliser ma position actuelle",
+        "myLocation": "Ma position",
+        "selectOriginParcel": "Sélectionnez une parcelle comme point de départ",
+        "pickDestination": "Arrivée",
+        "selectDestParcel": "Sélectionnez une parcelle de destination",
+        "availableRoutes": "{{count}} routes disponibles",
+        "chooseRoute": "Choisissez un itinéraire",
+        "distance": "DISTANCE",
+        "route": "TRAJET",
+        "totalDistance": "Distance Totale",
+        "via": "via {{summary}}",
+        "newCalculation": "Nouveau calcul",
+        "loading": "Chargement..."
+    },
+    "history": {
+        "title": "Historique de navigation",
+        "empty": "Aucun historique disponible",
+        "loading": "Chargement...",
+        "error": "Impossible de charger l'historique",
+        "retry": "Réessayer",
+        "driving": "En voiture",
+        "walking": "À pied",
+        "transit": "Transport en commun",
+        "bicycling": "À vélo",
+        "distance": "Distance",
+        "duration": "Durée",
+        "minutes": "min",
+        "km": "km",
+        "resume": "Reprendre",
+        "date_today": "Aujourd'hui",
+        "date_yesterday": "Hier"
+    },
+    "common": {
+        "ok": "OK",
+        "cancel": "Annuler",
+        "confirm": "Confirmer",
+        "close": "Fermer",
+        "save": "Enregistrer",
+        "delete": "Supprimer",
+        "edit": "Modifier",
+        "search": "Rechercher",
+        "loading": "Chargement...",
+        "error": "Erreur",
+        "success": "Succès",
+        "retry": "Réessayer",
+        "back": "Retour",
+        "next": "Suivant",
+        "skip": "Passer",
+        "done": "Terminé"
+    },
+    "errors": {
+        "network": "Erreur de connexion. Vérifiez votre connexion internet.",
+        "server": "Erreur serveur. Veuillez réessayer plus tard.",
+        "unknown": "Une erreur inconnue s'est produite.",
+        "location_permission": "Permission de localisation refusée.",
+        "location_disabled": "Les services de localisation sont désactivés."
+    },
+    "permissions": {
+        "location_title": "Autoriser la localisation",
+        "location_message": "Navipad a besoin d'accéder à votre position pour afficher votre localisation sur la carte et vous aider à trouver les amodiataires près de chez vous.",
+        "location_button": "Autoriser la localisation",
+        "location_denied_title": "Permission refusée",
+        "location_denied_message": "Pour utiliser la localisation, vous devez autoriser l'accès dans les paramètres de l'application.",
+        "location_disabled_title": "Services de localisation désactivés",
+        "location_disabled_message": "Les services de localisation sont désactivés sur votre appareil. Veuillez les activer dans les paramètres système.",
+        "open_settings": "Ouvrir les paramètres",
+        "maybe_later": "Plus tard",
+        "location_benefits": "Cela vous permettra de :",
+        "benefit_1": "Voir votre position sur la carte",
+        "benefit_2": "Trouver les amodiataires les plus proches",
+        "benefit_3": "Obtenir des directions précises",
+        "how_to_enable": "Comment activer :",
+        "enable_instructions": "1. Appuyez sur \"Ouvrir les paramètres\"\n2. Trouvez \"Localisation\" ou \"Position\"\n3. Activez l'autorisation pour Navipad"
+    },
+    "network": {
+        "offline_title": "Hors ligne",
+        "offline_message": "Vous êtes actuellement hors ligne. Certaines fonctionnalités peuvent être limitées.",
+        "connected_title": "Connexion rétablie",
+        "connected_message": "Vous êtes maintenant connecté via {{type}}",
+        "disconnected_title": "Connexion perdue",
+        "disconnected_message": "Vérifiez votre connexion internet",
+        "connection_changed_title": "Connexion modifiée",
+        "connection_changed_message": "Maintenant connecté via {{type}}",
+        "connection_types": {
+            "wifi": "Wi-Fi",
+            "cellular": "Données mobiles",
+            "ethernet": "Ethernet",
+            "bluetooth": "Bluetooth",
+            "unknown": "Connexion inconnue"
+        },
+        "status": {
+            "checking": "Vérification...",
+            "online": "En ligne",
+            "offline": "Hors ligne"
+        }
+    },
+    "tutorial": {
+        "welcome_title": "Bienvenue sur Navipad",
+        "welcome_message": "Découvrez comment utiliser l'application",
+        "step1_title": "Explorez la carte",
+        "step1_message": "Naviguez sur la carte pour découvrir les amodiataires autour de vous.",
+        "step2_title": "Recherchez",
+        "step2_message": "Utilisez la barre de recherche pour trouver rapidement un amodiataire.",
+        "step3_title": "Détails",
+        "step3_message": "Appuyez sur un marqueur pour voir les détails d'un amodiataire.",
+        "step4_title": "Votre position",
+        "step4_message": "Appuyez sur le bouton de localisation pour centrer la carte sur votre position.",
+        "get_started": "Commencer"
+    },
+    "map": {
+        "my_location": "Ma position",
+        "center_on_me": "Me centrer",
+        "zoom_in": "Zoomer",
+        "zoom_out": "Dézoomer",
+        "search_placeholder": "Rechercher un point...",
+        "no_results": "Aucun résultat trouvé",
+        "loading": "Chargement de la carte...",
+        "loading_markers": "Chargement des marqueurs...",
+        "zone_bounds": "Zone de délimitation",
+        "standard": "Standard",
+        "satellite": "Satellite",
+        "hybrid": "Hybride",
+        "type": {
+            "standard": "Standard",
+            "satellite": "Satellite",
+            "hybrid": "Hybride",
+            "android_auto": "Android Auto",
+            "carplay": "CarPlay",
+            "androidAutoSubtitle": "Mode conduite sombre",
+            "carplaySubtitle": "Mode conduite clair"
+        },
+        "error_title": "Erreur de chargement",
+        "error_generic": "Une erreur est survenue lors du chargement des données",
+        "error_timeout_title": "Délai d'attente dépassé",
+        "error_timeout": "La connexion a pris trop de temps. Veuillez réessayer.",
+        "error_network_title": "Erreur réseau",
+        "error_network": "Impossible de se connecter au serveur. Vérifiez votre connexion internet.",
+        "error_data_title": "Données invalides",
+        "error_malformed": "Les données reçues sont incorrectes. Veuillez réessayer.",
+        "retry": "Réessayer"
+    },
+    "amodiataire": {
+        "details": "Détails",
+        "contact": "Contact",
+        "phone": "Téléphone",
+        "email": "Email",
+        "address": "Adresse",
+        "photos": "Photos",
+        "videos": "Vidéos",
+        "documents": "Documents",
+        "no_photos": "Aucune photo",
+        "no_videos": "Aucune vidéo",
+        "no_documents": "Aucun document",
+        "service": "Service",
+        "services": "Services",
+        "status_active": "Actif",
+        "status_inactive": "Inactif",
+        "status_suspended": "Suspendu"
+    },
+    "amodiataireDetails": {
+        "defaultTitle": "Amodiataire/service",
+        "sections": {
+            "bibliography": "Bibliographie",
+            "contact": "Contact",
+            "announcements": "Annonces",
+            "photos": "Photo(s)",
+            "sites": "Parcelle(s)"
+        },
+        "fields": {
+            "email": "Email",
+            "phone": "Téléphone",
+            "website": "Site web",
+            "address": "Adresse"
+        },
+        "messages": {
+            "noSites": "Aucune parcelle enregistrée",
+            "loading": "Chargement...",
+            "error": "Erreur lors du chargement"
+        }
+    },
+    "announcements": {
+        "detailsTitle": "Détails de l'annonce",
+        "fields": {
+            "type": "Type",
+            "priority": "Priorité",
+            "publishedOn": "Publié le",
+            "validPeriod": "Valable",
+            "from": "du",
+            "to": "au",
+            "usefulLink": "🔗 Lien utile",
+            "contact": "Contact"
+        },
+        "types": {
+            "nouvelle_route": "Nouvelle route",
+            "maintenance": "Maintenance",
+            "info": "Information",
+            "urgence": "Urgence",
+            "amodiataire": "Amodiataire"
+        },
+        "priorities": {
+            "urgente": "🔴 Urgent",
+            "haute": "🟠 Haute",
+            "normale": "🟢 Normale"
+        },
+        "noAnnouncements": "Aucune annonce"
+    },
+    "search": {
+        "title": "Recherche",
+        "defaultPlaceholder": "Effectuer une recherche...",
+        "loading": "Recherche en cours...",
+        "noResults": "Aucun résultat trouvé",
+        "error": "Erreur lors de la recherche",
+        "results": "{{count}} résultat(s)",
+        "recent": "Recherches récentes",
+        "clear_recent": "Effacer l'historique",
+        "clear_all": "Tout effacer",
+        "clear_item": "Supprimer",
+        "no_history": "Aucun historique de recherche",
+        "history_cleared": "Historique effacé",
+        "item_removed": "Élément supprimé",
+        "placeholder": {
+            "routes": "Rechercher une route...",
+            "announcements": "Rechercher une annonce...",
+            "services": "Rechercher un service..."
+        },
+        "types": {
+            "amodiataires": "Amodiataires/services",
+            "routes": "Routes"
+        }
+    },
+    "navigation": {
+        "login": "Connexion",
+        "profile": "Profil",
+        "list": "Liste",
+        "settings": "Paramètres",
+        "notifications": "Annonce"
+    },
+    "list": {
+        "title": "Amodiataires",
+        "count": "{{count}} amodiataires trouvés",
+        "servicesCount": "{{count}} services trouvés",
+        "loading": "Chargement des amodiataires...",
+        "loadingServices": "Chargement des services...",
+        "error": "Erreur lors du chargement",
+        "empty": "Aucun amodiataire trouvé",
+        "emptyServices": "Aucun service trouvé",
+        "hasLocation": "Localisation disponible"
+    },
+    "login": {
+        "signIn": "Connexion",
+        "signUp": "Inscription",
+        "welcomeBack": "Bon retour !",
+        "welcomeSignUp": "Créer un compte",
+        "signInSubtitle": "Connectez-vous pour continuer votre expérience",
+        "signUpSubtitle": "Rejoignez Navipad pour accéder à toutes les fonctionnalités",
+        "email": "Adresse email",
+        "password": "Mot de passe",
+        "confirmPassword": "Confirmer le mot de passe",
+        "passwordPlaceholder": "Votre mot de passe",
+        "confirmPasswordPlaceholder": "Confirmez votre mot de passe",
+        "createAccount": "Créer le compte",
+        "alreadyHaveAccount": "Vous avez déjà un compte ?",
+        "noAccount": "Vous n'avez pas de compte ?",
+        "forgotPassword": "Mot de passe oublié ?",
+        "error": "Erreur",
+        "success": "Succès",
+        "fillFields": "Veuillez remplir tous les champs",
+        "emailRequired": "Email requis",
+        "emailInvalid": "Email invalide",
+        "passwordRequired": "Mot de passe requis",
+        "passwordTooShort": "Minimum 6 caractères",
+        "passwordMismatch": "Les mots de passe ne correspondent pas",
+        "signUpSuccess": "Compte créé avec succès",
+        "loginSuccess": "Connexion réussie",
+        "genericError": "Une erreur est survenue",
+        "terms": "En créant un compte, vous acceptez nos Conditions d'utilisation et notre Politique de confidentialité."
+    },
+    "settings": {
+        "title": "Paramètres",
+        "appearance": "Apparence",
+        "theme": {
+            "light": "Thème clair",
+            "dark": "Thème sombre",
+            "auto": "Automatique",
+            "autoSubtitle": "Suit le système"
+        },
+        "language": "Langue",
+        "about": "À propos",
+        "version": "Version",
+        "logout": "Déconnexion"
+    },
+    "lots": {
+        "selectTitle": "Sélectionner un lot",
+        "count": "{{count}} lots disponibles",
+        "empty": "Aucun lot disponible"
+    },
+    "navigationModal": {
+        "title": "Navigation vers",
+        "origin": "Votre position",
+        "destination": "Destination",
+        "loading": "Calcul de l'itinéraire...",
+        "noDestination": "Aucune destination sélectionnée",
+        "fetchingPosition": "Récupération de votre position...",
+        "noData": "Données de navigation indisponibles",
+        "start": "Démarrer la navigation",
+        "startTitle": "Démarrer la navigation",
+        "startMessage": "Voulez-vous ouvrir Google Maps pour la navigation ?",
+        "openMaps": "Ouvrir Maps",
+        "inApp": "Navigation intégrée",
+        "inAppTitle": "Navigation intégrée",
+        "inAppMessage": "Fonctionnalité en développement",
+        "error": "Erreur",
+        "noLocation": "Impossible de récupérer votre position",
+        "routeError": "Impossible de charger les itinéraires",
+        "mapsError": "Impossible d'ouvrir Google Maps"
+    },
+    "inAppNavigation": {
+        "remainingDistance": "Distance restante",
+        "of": "sur",
+        "arrival": "Arrivée",
+        "elapsed": "Écoulé",
+        "then": "Ensuite",
+        "walkingMode": "Mode à pied",
+        "drivingMode": "Mode véhicule",
+        "meterPrecision": "Précision au mètre",
+        "time": {
+            "hours": "h",
+            "minutes": "min",
+            "seconds": "s"
+        },
+        "voice": {
+            "started": "Navigation démarrée. Distance totale : {{distance}}. Durée estimée : {{duration}}. Bonne route !",
+            "arrived": "Vous êtes arrivé à destination.",
+            "in": "Dans {{distance}}, {{instruction}}",
+            "remaining": "Distance restante à destination: {{distance}}",
+            "almostThere": "Plus que {{distance}} jusqu'à destination",
+            "warnings": {
+                "school": "Attention, école à proximité. Ralentissez.",
+                "trafficLight": "Feux de signalisation à venir.",
+                "crosswalk": "Ralentissez au passage piéton.",
+                "roundabout": "Rond-point à venir.",
+                "toll": "Péage à venir. Préparez votre paiement."
+            }
+        }
+    },
+    "dashboard": {
+        "title": "Mon Espace",
+        "profile": "Profil",
+        "photos": "Photos",
+        "videos": "Vidéos",
+        "documents": "Documents",
+        "profileInfo": "Informations du profil",
+        "companyName": "Raison sociale",
+        "name": "Nom",
+        "email": "Email",
+        "phone": "Téléphone",
+        "address": "Adresse",
+        "addMedia": "Ajouter un média",
+        "actions": {
+            "addPhoto": "Ajouter une photo",
+            "addVideo": "Ajouter une vidéo",
+            "addDocument": "Ajouter un document"
+        },
+        "deleteMedia": "Supprimer",
+        "deleteMediaConfirm": "Voulez-vous vraiment supprimer ce média ?",
+        "delete": "Supprimer",
+        "logout": "Déconnexion",
+        "logoutConfirm": "Voulez-vous vraiment vous déconnecter ?",
+        "success": "Succès",
+        "error": "Erreur",
+        "mediaDeleted": "Média supprimé",
+        "deleteError": "Impossible de supprimer le média",
+        "featureComingSoon": "Fonctionnalité à venir",
+        "uploadSuccess": "Upload réussi",
+        "uploadError": "Erreur d'upload",
+        "selectFromGallery": "Choisir depuis la galerie",
+        "takePhoto": "Prendre une photo",
+        "selectDocument": "Choisir un document",
+        "uploading": "Upload en cours...",
+        "permissionRequired": "Permission requise",
+        "cameraPermission": "Permission d'accès à la caméra requise",
+        "galleryPermission": "Permission d'accès à la galerie requise",
+        "mediaPreview": "Aperçu du média",
+        "videoPlayer": "Lecteur vidéo",
+        "playVideo": "Lire la vidéo",
+        "pauseVideo": "Mettre en pause",
+        "muteVideo": "Couper le son",
+        "unmuteVideo": "Activer le son",
+        "fullscreen": "Plein écran",
+        "exitFullscreen": "Quitter le plein écran"
+    },
+    "media": {
+        "noMedia": "Aucun média",
+        "noPhotos": "Aucune photo",
+        "noVideos": "Aucune vidéo",
+        "noDocuments": "Aucun document"
+    },
+    "route": {
+        "status": {
+            "active": "Actif",
+            "inactive": "Inactif",
+            "maintenance": "Maintenance"
+        },
+        "roadType": "Type de route",
+        "maxSpeed": "Vitesse max",
+        "width": "Largeur",
+        "surface": "Surface",
+        "details": "Détails de la route",
+        "navigate": "Naviguer vers cette route"
+    },
+    "notifications": {
+        "title": "Annonces",
+        "search": "Rechercher des annonces...",
+        "empty": "Aucune annonce",
+        "noResults": "Aucune annonce trouvée"
+    }
+}

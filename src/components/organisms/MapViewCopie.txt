@@ -1,0 +1,1118 @@
+/**
+ * Composant MapView (Organism)
+ * 
+ * Carte Google Maps avec marqueurs, zone de délimitation,
+ * et suivi de la position utilisateur.
+ * 
+ * @module components/organisms/MapView
+ */
+
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { View, StyleSheet, ActivityIndicator, Text, Platform, Animated } from 'react-native';
+import { moderateScale } from 'react-native-size-matters';
+import MapView, { Marker, Polygon, Polyline, PROVIDER_GOOGLE, PROVIDER_DEFAULT, MapType } from 'react-native-maps';
+import type { MapMarker as MapMarkerType } from 'react-native-maps';
+import { AndroidBuildingLabel } from '@/components/molecules/AndroidBuildingLabel';
+import type { AndroidLabelData } from '@/components/molecules/AndroidBuildingLabel';
+import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
+
+// Services & Store
+import { get } from '@/services/api/client';
+import { ApiRoutes } from '@/services/api/routes';
+import { useMapStore, useMapType } from '@/store';
+import { getCurrentLocation } from '@/services/location';
+import { useThemeColors, useIsDarkMode } from '@/theme';
+import { useBuildingsData } from '@/hooks/useBuildingsData';
+import type { AmodiatairCoordinates, ZoneBoundsResponse, AppMapType, AmodiataireListItem } from '@/types';
+
+// ============================================================================
+// Props
+// ============================================================================
+
+export interface GeoMapProps {
+    /** Mode d'affichage de la carte */
+    mapType?: AppMapType;
+    /** ID de la route sélectionnée */
+    selectedRouteId?: string | null;
+    /** Callback quand une route est sélectionnée */
+    onRouteSelect?: (routeId: string | null) => void;
+    /** Route de navigation active */
+    navigationRoute?: {
+        id: string;
+        polyline: Array<{ latitude: number; longitude: number }>;
+        buildingCoordinates?: Array<{ latitude: number; longitude: number }>;
+        destinationCoordinates?: { latitude: number; longitude: number };
+        segments?: Array<{
+            points: Array<{ latitude: number; longitude: number }>;
+            type: 'google' | 'backend' | 'internal';
+            name?: string;
+        }>;
+    } | null;
+    /** Mode 3D activé */
+    is3DEnabled?: boolean;
+    /** Navigation active (pour activer le mode 3D uniquement pendant la navigation) */
+    isNavigating?: boolean;
+    /** Route calculée par le calculateur de distance */
+    distanceRoute?: {
+        polyline: Array<{ latitude: number; longitude: number }>;
+        summary: string;
+        distance: string;
+        duration: string;
+        originMarker?: { latitude: number; longitude: number; name: string; polygonCoordinates?: { latitude: number; longitude: number }[] };
+        destinationMarker?: { latitude: number; longitude: number; name: string; polygonCoordinates?: { latitude: number; longitude: number }[] };
+        segments?: Array<{
+            points: Array<{ latitude: number; longitude: number }>;
+            type: 'google' | 'backend' | 'internal';
+            name?: string;
+        }>;
+    } | null;
+}
+
+// ============================================================================
+// Styles de Carte
+// ============================================================================
+
+/**
+ * Style de carte pour le mode sombre (Standard Dark)
+ */
+const darkMapStyle = [
+    {
+        elementType: 'geometry',
+        stylers: [{ color: '#242f3e' }],
+    },
+    {
+        elementType: 'labels.text.stroke',
+        stylers: [{ color: '#242f3e' }],
+    },
+    {
+        elementType: 'labels.text.fill',
+        stylers: [{ color: '#746855' }],
+    },
+    {
+        featureType: 'poi',
+        elementType: 'geometry',
+        stylers: [{ color: '#283d6a' }],
+    },
+    {
+        featureType: 'poi',
+        elementType: 'labels.text.fill',
+        stylers: [{ color: '#6f9ba5' }],
+    },
+    {
+        featureType: 'poi',
+        elementType: 'labels.text.stroke',
+        stylers: [{ color: '#1d2c4d' }],
+    },
+];
+
+/**
+ * Style de carte pour Android Auto (Mode Conduite Sombre Blue-Grey)
+ */
+const androidAutoMapStyle = [
+    { elementType: 'geometry', stylers: [{ color: '#1d2c4d' }] },
+    { elementType: 'labels.text.fill', stylers: [{ color: '#8ec3b9' }] },
+    { elementType: 'labels.text.stroke', stylers: [{ color: '#1a3646' }] },
+    { featureType: 'administrative.country', elementType: 'geometry.stroke', stylers: [{ color: '#4b6878' }] },
+    { featureType: 'administrative.land_parcel', elementType: 'labels.text.fill', stylers: [{ color: '#64779e' }] },
+    { featureType: 'administrative.province', elementType: 'geometry.stroke', stylers: [{ color: '#4b6878' }] },
+    { featureType: 'landscape.man_made', elementType: 'geometry.stroke', stylers: [{ color: '#334e87' }] },
+    { featureType: 'landscape.natural', elementType: 'geometry', stylers: [{ color: '#023e58' }] },
+    { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#283d6a' }] },
+    { featureType: 'poi', elementType: 'labels.text.fill', stylers: [{ color: '#6f9ba5' }] },
+    { featureType: 'poi', elementType: 'labels.text.stroke', stylers: [{ color: '#1d2c4d' }] },
+    { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#304a7d' }] },
+    { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#98a5be' }] },
+    { featureType: 'road', elementType: 'labels.text.stroke', stylers: [{ color: '#1d2c4d' }] },
+    { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#2c6675' }] },
+    { featureType: 'road.highway', elementType: 'geometry.stroke', stylers: [{ color: '#255761' }] },
+    { featureType: 'road.highway', elementType: 'labels.text.fill', stylers: [{ color: '#b0d5ce' }] },
+    { featureType: 'road.highway', elementType: 'labels.text.stroke', stylers: [{ color: '#023e58' }] },
+    { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0e1626' }] }
+];
+
+/**
+ * Style de carte pour CarPlay (Mode Conduite Clair Haute Visibilité)
+ */
+const carplayMapStyle = [
+    { featureType: 'all', elementType: 'labels.text.fill', stylers: [{ color: '#333333' }] },
+    { featureType: 'landscape', stylers: [{ color: '#f5f5f5' }] },
+    { featureType: 'poi', stylers: [{ visibility: 'on' }] },
+    { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#ffffff' }] },
+    { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#ffecb3' }] },
+    { featureType: 'water', stylers: [{ color: '#b3e5fc' }] }
+];
+
+// ============================================================================
+// Helpers
+// ============================================================================
+
+/** Aire approximative d'un polygone en coordonnées lat/lng (formule de Shoelace) */
+function calcPolygonArea(coords: Array<{ latitude: number; longitude: number }>): number {
+    const n = coords.length;
+    if (n < 3) return 0;
+    let area = 0;
+    for (let i = 0; i < n; i++) {
+        const j = (i + 1) % n;
+        area += coords[i].latitude * coords[j].longitude;
+        area -= coords[j].latitude * coords[i].longitude;
+    }
+    return Math.abs(area / 2);
+}
+
+// ============================================================================
+// Composant
+// ============================================================================
+
+/**
+ * Composant MapView
+ */
+export function GeoMap({ 
+    mapType: propMapType, 
+    selectedRouteId = null, 
+    onRouteSelect, 
+    navigationRoute = null,
+    is3DEnabled = false,
+    isNavigating = false,
+    distanceRoute = null
+}: GeoMapProps) {
+    const { t } = useTranslation();
+    const colors = useThemeColors();
+    const isDark = useIsDarkMode();
+    const mapRef = useRef<MapView>(null);
+    const storedMapType = useMapType();
+
+    // Priorité au prop, sinon au store
+    const mapType = propMapType || storedMapType;
+
+    const {
+        region,
+        setRegion,
+        markers,
+        setMarkers,
+        selectedMarkerId,
+        setSelectedMarkerId,
+        isFollowingUser,
+        setIsFollowingUser,
+        showsUserLocation,
+        showsZoneBounds,
+    } = useMapStore();
+
+    const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+    // latitudeDelta courant pour contrôler la visibilité des labels/polygones
+    const [visibilityDelta, setVisibilityDelta] = useState(region.latitudeDelta);
+
+    // Refs des Markers bâtiments pour appeler showCallout()/hideCallout()
+    const markerRefs = useRef<Map<string, MapMarkerType>>(new Map());
+    // ID du bâtiment dont le callout est actuellement ouvert
+    const openCalloutId = useRef<string | null>(null);
+    // Timer pour throttler le recalcul du bâtiment le plus proche
+    const nearestBuildingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Labels overlay — tous les bâtiments dans le viewport courant
+    const [overlayLabels, setOverlayLabels] = useState<AndroidLabelData[]>([]);
+    // Compteur de version pour ignorer les résultats d'un calcul dépassé
+    const overlayVersionRef = useRef(0);
+    // Valeur d'opacité animée pour le fondu entrée/sortie des labels
+    const overlayFadeAnim = useRef(new Animated.Value(1)).current;
+
+    // Déterminer le style de carte et le type effectif
+    let effectiveMapType: MapType = 'standard';
+    let customStyle: any[] | undefined = undefined;
+
+    if (mapType === 'android_auto') {
+        effectiveMapType = 'standard';
+        customStyle = androidAutoMapStyle;
+    } else if (mapType === 'carplay') {
+        effectiveMapType = 'standard';
+        customStyle = carplayMapStyle;
+    } else if (mapType === 'standard' && isDark) {
+        effectiveMapType = 'standard';
+        customStyle = darkMapStyle;
+    } else {
+        effectiveMapType = mapType as MapType;
+    }
+
+    // ============================================================================
+    // Chargement des Coordonnées Amodiataires — cache RAM → React Query → disque
+    // ============================================================================
+
+    const {
+        amodiataires,
+        isLoading: isLoadingAmodiataires,
+    } = useBuildingsData();
+
+    // Extraire tous les bâtiments avec polygones depuis tous les amodiataires — mémoïsé
+    const buildingPolygons = React.useMemo(() => {
+        const result: Array<{
+            id: string;
+            amodiatairId: string;
+            nom: string;
+            amodiataireName: string;
+            coordinates: Array<{ latitude: number; longitude: number }>;
+            center: { latitude: number; longitude: number };
+            // latitudeDelta en dessous duquel le polygone s'affiche
+            polygonVisibleDelta: number;
+            // latitudeDelta en dessous duquel le label s'affiche (plus restrictif)
+            labelVisibleDelta: number;
+        }> = [];
+
+        amodiataires.forEach((amod: AmodiataireListItem) => {
+            if (!amod.batiments || !Array.isArray(amod.batiments)) return;
+            amod.batiments.forEach((bat) => {
+                const rawCoords = bat.coordinates;
+                if (!rawCoords) return;
+
+                const coordsArray: any[] = Array.isArray(rawCoords) ? rawCoords : [rawCoords];
+                if (coordsArray.length < 3) return;
+
+                const coords = coordsArray
+                    .map((c: any) => ({
+                        latitude: Number(c?.latitude ?? c?.lat ?? 0),
+                        longitude: Number(c?.longitude ?? c?.lng ?? 0),
+                    }))
+                    .filter((c) => c.latitude !== 0 && c.longitude !== 0 && !isNaN(c.latitude) && !isNaN(c.longitude));
+
+                if (coords.length < 3) return;
+
+                const centerLat = coords.reduce((s, c) => s + c.latitude, 0) / coords.length;
+                const centerLng = coords.reduce((s, c) => s + c.longitude, 0) / coords.length;
+
+                // Importance du bâtiment basée sur sa surface réelle.
+                // À ~4°N (Douala) : 1° lat ≈ 111km, 1° lng ≈ 110.7km
+                // Conversions : 100m×100m → area ≈ 8e-7 | 50m×50m → 2e-7 | 20m×20m → 3.2e-8
+                const area = calcPolygonArea(coords);
+                let polygonVisibleDelta: number;
+                let labelVisibleDelta: number;
+
+                // Seuils calibrés pour apparaître au niveau quartier (delta ≈ 0.010-0.015)
+                // et non au niveau ville/district (delta > 0.02) — évite la superposition
+                if (area > 5e-7) {
+                    // Très grand (≥~80m×80m) : premiers à apparaître au niveau quartier
+                    polygonVisibleDelta = 0.05;
+                    labelVisibleDelta = 0.015;
+                } else if (area > 5e-8) {
+                    // Grand (~25-80m)
+                    polygonVisibleDelta = 0.025;
+                    labelVisibleDelta = 0.010;
+                } else if (area > 5e-9) {
+                    // Moyen (~8-25m) : niveau rue
+                    polygonVisibleDelta = 0.012;
+                    labelVisibleDelta = 0.006;
+                } else {
+                    // Petit (<~8m) : seulement très proche
+                    polygonVisibleDelta = 0.006;
+                    labelVisibleDelta = 0.003;
+                }
+
+                result.push({
+                    id: bat.id,
+                    amodiatairId: amod.id,
+                    nom: amod.raisonSociale || (amod as any).profile?.username || bat.nom || 'Bâtiment',
+                    amodiataireName: amod.raisonSociale || '',
+                    coordinates: coords,
+                    center: { latitude: centerLat, longitude: centerLng },
+                    polygonVisibleDelta,
+                    labelVisibleDelta,
+                });
+            });
+        });
+
+        if (result.length > 0) {
+            console.log(`🏗️ ${result.length} bâtiments chargés`);
+        } else {
+            console.warn('⚠️ buildingPolygons vide — vérifier batiments[].coordinates');
+        }
+
+        return result;
+    }, [amodiataires]);
+
+    // ============================================================================
+    // Chargement de la Zone de Délimitation
+    // ============================================================================
+
+    const { data: zoneBounds, isLoading: isLoadingZone } = useQuery({
+        queryKey: ['zone-bounds'],
+        queryFn: () => get<ZoneBoundsResponse>(ApiRoutes.getFullUrl(ApiRoutes.DELIMITATION)),
+        staleTime: 24 * 60 * 60 * 1000, // 24 heures
+    });
+
+    // ============================================================================
+    // Effets
+    // ============================================================================
+
+    /**
+     * Charger la position utilisateur au montage
+     */
+    useEffect(() => {
+        async function loadUserLocation() {
+            const location = await getCurrentLocation();
+            if (location) {
+                const coords = {
+                    latitude: location.coords.latitude,
+                    longitude: location.coords.longitude,
+                };
+                setUserLocation(coords);
+
+                // Centrer la carte sur l'utilisateur si c'est le premier chargement
+                setRegion({
+                    ...coords,
+                    latitudeDelta: 0.0922,
+                    longitudeDelta: 0.0421,
+                });
+                console.log('📍 Carte centrée sur la position utilisateur');
+            } else if (zoneBounds) {
+                // Si pas de localisation utilisateur, centrer sur la zone de service
+                const centerLat = zoneBounds.center.lat ?? zoneBounds.center.latitude;
+                const centerLng = zoneBounds.center.lng ?? zoneBounds.center.longitude;
+                
+                if (centerLat && centerLng) {
+                    setRegion({
+                        latitude: centerLat,
+                        longitude: centerLng,
+                        latitudeDelta: 0.1,
+                        longitudeDelta: 0.1,
+                    });
+                    console.log('📍 Carte centrée sur la zone de service:', { centerLat, centerLng });
+                }
+            }
+        }
+
+        loadUserLocation();
+    }, [zoneBounds]);
+
+    /**
+     * Mettre à jour les marqueurs quand les amodiataires sont chargés
+     */
+    useEffect(() => {
+        if (amodiataires && amodiataires.length > 0) {
+            type MarkerItem = { id: string; coordinate: { latitude: number; longitude: number }; title: string; type: 'amodiataire' };
+            const newMarkers: MarkerItem[] = [];
+
+            amodiataires.forEach((amod: AmodiataireListItem) => {
+                const centerCoord = (amod as any).center || (amod as any).coordinates;
+                const latitude = centerCoord?.latitude ?? centerCoord?.lat;
+                const longitude = centerCoord?.longitude ?? centerCoord?.lng;
+
+                if (
+                    typeof latitude !== 'number' ||
+                    typeof longitude !== 'number' ||
+                    isNaN(latitude) || isNaN(longitude) ||
+                    latitude < -90 || latitude > 90 ||
+                    longitude < -180 || longitude > 180
+                ) return;
+
+                newMarkers.push({
+                    id: amod.id,
+                    coordinate: { latitude, longitude },
+                    title: amod.raisonSociale || `${(amod as any).prenom || ''} ${(amod as any).nom || ''}`.trim(),
+                    type: 'amodiataire',
+                });
+            });
+
+            setMarkers(newMarkers);
+            console.log('📍', newMarkers.length, 'marqueurs chargés');
+        }
+    }, [amodiataires]);
+
+    /**
+     * Centrer sur l'utilisateur si le suivi est activé
+     */
+    useEffect(() => {
+        if (isFollowingUser && userLocation && mapRef.current) {
+            mapRef.current.animateToRegion({
+                ...userLocation,
+                latitudeDelta: 0.0922,
+                longitudeDelta: 0.0421,
+            });
+        }
+    }, [isFollowingUser, userLocation]);
+
+    /**
+     * Animer la carte UNIQUEMENT pour les changements externes (bouton localisation,
+     * navigation, etc.). isUserRegionUpdate empêche la boucle :
+     *   user zoom → handleRegionChange → setRegion → effet → SKIP animation
+     * Sans ce guard, setRegion déclenche animateToRegion → onRegionChangeComplete
+     * → boucle infinie qui bloque le zoom sur Android.
+     */
+    const isProgrammaticRegionChange = useRef(false);
+    const isUserRegionUpdate = useRef(false);
+    useEffect(() => {
+        if (isUserRegionUpdate.current) {
+            isUserRegionUpdate.current = false;
+            return;
+        }
+        if (mapRef.current && region) {
+            isProgrammaticRegionChange.current = true;
+            mapRef.current.animateToRegion(region, 500);
+            setVisibilityDelta(region.latitudeDelta);
+        }
+    }, [region]);
+
+    /**
+     * Animer la caméra quand le mode 3D change
+     */
+    useEffect(() => {
+        if (mapRef.current) {
+            if (is3DEnabled && isNavigating) {
+                // Centrer sur la position utilisateur (priorité) sinon la région actuelle
+                const center = userLocation || region;
+
+                // Activer automatiquement le mode "Suivre l'utilisateur"
+                if (!isFollowingUser) {
+                    setIsFollowingUser(true);
+                }
+
+                const camera = {
+                    center,
+                    pitch: 45,
+                    heading: 0,
+                    altitude: 800,
+                    zoom: 17,
+                };
+                
+                console.log('🚀 [MapView] Centrage caméra sur position utilisateur pour navigation');
+                mapRef.current.animateCamera(camera, { duration: 1000 });
+            } else if (!isNavigating) {
+                // Mode normal: réinitialiser la caméra si on quitte la navigation
+                const camera = {
+                    center: region,
+                    pitch: 0,
+                    heading: 0,
+                    altitude: 2000,
+                    zoom: region.latitudeDelta < 0.01 ? 15 : 13,
+                };
+                mapRef.current.animateCamera(camera, { duration: 1000 });
+            }
+        }
+    }, [is3DEnabled, isNavigating]);
+
+    /**
+     * Suivre la position utilisateur en 3D pendant la navigation
+     */
+    useEffect(() => {
+        if (is3DEnabled && isNavigating && userLocation && mapRef.current) {
+            const camera = {
+                center: userLocation,
+                pitch: 45, // Inclinaison modérée
+                heading: 0,
+                altitude: 1200, // Altitude moins profonde
+                zoom: 15.5 // Zoom moins profond
+            };
+
+            mapRef.current.animateCamera(camera, { duration: 500 });
+        }
+    }, [userLocation, is3DEnabled, isNavigating]);
+
+    useEffect(() => {
+        if (navigationRoute) {
+            console.log('🗺️ [MapView] Route de navigation reçue:', JSON.stringify({
+                id: navigationRoute.id,
+                polylinePoints: navigationRoute.polyline?.length,
+                buildingPoints: navigationRoute.buildingCoordinates?.length,
+                hasDestination: !!(navigationRoute as any).destinationCoordinates
+            }));
+        }
+    }, [navigationRoute]);
+
+    // ============================================================================
+    // Callout automatique — bâtiment le plus proche sur l'axe caméra
+    // ============================================================================
+
+    /**
+     * Calcule la distance en mètres entre deux coordonnées (formule de Haversine).
+     */
+    const haversineDistance = useCallback((
+        lat1: number, lng1: number,
+        lat2: number, lng2: number
+    ): number => {
+        const R = 6371000;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLng = (lng2 - lng1) * Math.PI / 180;
+        const a = Math.sin(dLat / 2) ** 2 +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLng / 2) ** 2;
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }, []);
+
+    /**
+     * Trouve le bâtiment visible le plus proche du centre de la carte
+     * (= centre de la caméra = ce que l'utilisateur regarde).
+     * Ouvre son callout, ferme le précédent.
+     */
+    const updateNearestCallout = useCallback((currentRegion: typeof region) => {
+        const visibleBuildings = buildingPolygons.filter(
+            (b) => currentRegion.latitudeDelta <= b.labelVisibleDelta
+        );
+        if (visibleBuildings.length === 0) {
+            // Plus de bâtiments visibles → fermer le callout ouvert
+            if (openCalloutId.current) {
+                const ref = markerRefs.current.get(openCalloutId.current);
+                ref?.hideCallout();
+                openCalloutId.current = null;
+            }
+            return;
+        }
+
+        // Centre de la caméra = centre de la région affichée
+        const camLat = currentRegion.latitude;
+        const camLng = currentRegion.longitude;
+
+        // Trouver le bâtiment le plus proche du centre caméra
+        let nearestId = visibleBuildings[0].id;
+        let nearestDist = haversineDistance(
+            camLat, camLng,
+            visibleBuildings[0].center.latitude,
+            visibleBuildings[0].center.longitude
+        );
+        for (const b of visibleBuildings) {
+            const d = haversineDistance(camLat, camLng, b.center.latitude, b.center.longitude);
+            if (d < nearestDist) {
+                nearestDist = d;
+                nearestId = b.id;
+            }
+        }
+
+        // Si c'est déjà le callout ouvert, rien à faire
+        if (nearestId === openCalloutId.current) return;
+
+        // Fermer l'ancien callout
+        if (openCalloutId.current && openCalloutId.current !== nearestId) {
+            const oldRef = markerRefs.current.get(openCalloutId.current);
+            oldRef?.hideCallout();
+        }
+
+        // Ouvrir le nouveau callout
+        const newRef = markerRefs.current.get(nearestId);
+        if (newRef) {
+            newRef.showCallout();
+            openCalloutId.current = nearestId;
+        }
+    }, [buildingPolygons, haversineDistance]);
+
+    /**
+     * Calcule la position écran des N bâtiments les plus proches du centre caméra
+     * dans le viewport courant, puis met à jour l'overlay.
+     *
+     * Contraintes :
+     * - MAX_OVERLAY_LABELS : évite l'affichage de tous les bâtiments d'une zone dense.
+     * - overlayVersionRef : ignore les résultats d'un calcul devenu obsolète (pan rapide).
+     * - N'est appelé QUE quand la caméra est arrêtée (onRegionChangeComplete ou fin du
+     *   throttle 300 ms) — les labels sont vidés pendant le pan dans handleRegionChangeContinuous.
+     */
+    const MAX_OVERLAY_LABELS = 6;
+
+    const updateOverlayLabels = useCallback(async (newRegion: typeof region) => {
+        if (!mapRef.current) return;
+
+        // 1. Filtre zoom — même seuil que les markers existants
+        const zoomFiltered = buildingPolygons.filter(
+            (b) => newRegion.latitudeDelta <= b.labelVisibleDelta
+        );
+        if (zoomFiltered.length === 0) { setOverlayLabels([]); return; }
+
+        // 2. Filtre viewport strict (sans padding pour éviter les bâtiments hors champ)
+        const latHalf = newRegion.latitudeDelta / 2;
+        const lngHalf = newRegion.longitudeDelta / 2;
+        const inView = zoomFiltered.filter((b) =>
+            b.center.latitude  >= newRegion.latitude  - latHalf &&
+            b.center.latitude  <= newRegion.latitude  + latHalf &&
+            b.center.longitude >= newRegion.longitude - lngHalf &&
+            b.center.longitude <= newRegion.longitude + lngHalf
+        );
+        if (inView.length === 0) { setOverlayLabels([]); return; }
+
+        // 3. Trier par distance euclidienne au centre caméra, garder les N plus proches
+        const camLat = newRegion.latitude;
+        const camLng = newRegion.longitude;
+        const nearest = [...inView]
+            .sort((a, b) => {
+                const da = (a.center.latitude - camLat) ** 2 + (a.center.longitude - camLng) ** 2;
+                const db = (b.center.latitude - camLat) ** 2 + (b.center.longitude - camLng) ** 2;
+                return da - db;
+            })
+            .slice(0, MAX_OVERLAY_LABELS);
+
+        // 4. Snapshot de version — ignore le résultat si une mise à jour plus récente arrive
+        const version = ++overlayVersionRef.current;
+
+        try {
+            const points = await Promise.all(
+                nearest.map((b) => mapRef.current!.pointForCoordinate(b.center))
+            );
+            if (overlayVersionRef.current !== version) return;
+
+            // 5. Anti-overlap : séparation minimale entre labels voisins.
+            //    nearest est trié par distance (plus proche = priorité haute → reste fixe).
+            //    Les labels de priorité moindre sont décalés vers le haut.
+            const SEP_X = 88;  // largeur estimée d'un label (px)
+            const SEP_Y = 42;  // hauteur estimée d'un label (px)
+            const adj = nearest.map((b, i) => ({ b, sx: points[i].x, sy: points[i].y }));
+            for (let i = 1; i < adj.length; i++) {
+                for (let j = 0; j < i; j++) {
+                    const overlapX = Math.abs(adj[i].sx - adj[j].sx) < SEP_X;
+                    const overlapY = Math.abs(adj[i].sy - adj[j].sy) < SEP_Y;
+                    if (overlapX && overlapY) {
+                        // Pousser i vers le haut (sy plus petit) pour dégager j
+                        adj[i].sy = adj[j].sy - SEP_Y - 4;
+                    }
+                }
+            }
+
+            // 6. Arrêter tout fondu en cours et afficher les labels immédiatement
+            overlayFadeAnim.stopAnimation();
+            overlayFadeAnim.setValue(1);
+
+            setOverlayLabels(
+                adj.map(({ b, sx, sy }) => ({
+                    id: b.id,
+                    amodiatairId: b.amodiatairId,
+                    nom: b.nom,
+                    amodiataireName: b.amodiataireName,
+                    screenX: sx,
+                    screenY: sy,
+                }))
+            );
+
+        } catch {
+            // pointForCoordinate peut échouer si la carte n'est pas encore prête
+        }
+    }, [buildingPolygons]);
+
+    // ============================================================================
+    // Handlers
+    // ============================================================================
+
+    /**
+     * Gère le changement de région — NE PAS rappeler setRegion si c'est
+     * un changement programmatique (animateToRegion) pour éviter la boucle.
+     * En mode 3D, on ignore les changements de latitudeDelta (rotation/pitch
+     * fausse la valeur) pour éviter la disparition des bâtiments.
+     */
+    const handleRegionChange = (newRegion: typeof region) => {
+        if (is3DEnabled && isNavigating) return;
+        if (isProgrammaticRegionChange.current) {
+            isProgrammaticRegionChange.current = false;
+            return;
+        }
+        setVisibilityDelta(newRegion.latitudeDelta);
+        isUserRegionUpdate.current = true;
+        setRegion(newRegion);
+        updateOverlayLabels(newRegion);
+    };
+
+    /**
+     * Mise à jour continue pendant le pan/zoom.
+     * - Fondu-sortie IMMÉDIAT (150 ms) dès le premier pixel de déplacement :
+     *   les positions écran deviennent invalides aussitôt que la carte bouge,
+     *   un fondu rapide évite l'effet "label collé à l'écran".
+     * - Suppression du callout natif s'il était ouvert (évite le doublon avec l'overlay).
+     * - Throttle 300 ms pour recalculer les positions une fois le mouvement arrêté.
+     */
+    const handleRegionChangeContinuous = (newRegion: typeof region) => {
+        setVisibilityDelta(newRegion.latitudeDelta);
+
+        // Fondu-sortie immédiat — stoppe toute animation précédente
+        overlayFadeAnim.stopAnimation();
+        Animated.timing(overlayFadeAnim, {
+            toValue: 0,
+            duration: 120,
+            easing: Easing.in(Easing.ease),
+            useNativeDriver: true,
+        }).start();
+
+        // Fermer le callout natif ouvert (sinon il coexiste avec l'overlay)
+        if (openCalloutId.current) {
+            markerRefs.current.get(openCalloutId.current)?.hideCallout();
+            openCalloutId.current = null;
+        }
+
+        if (nearestBuildingTimer.current) clearTimeout(nearestBuildingTimer.current);
+        nearestBuildingTimer.current = setTimeout(() => {
+            updateOverlayLabels(newRegion);
+        }, 300);
+    };
+
+    /**
+     * Gère la sélection d'un marqueur
+     */
+    const handleMarkerPress = (markerId: string) => {
+        setSelectedMarkerId(markerId);
+    };
+
+    // ============================================================================
+    // Rendu
+    // ============================================================================
+
+    if (isLoadingAmodiataires || isLoadingZone) {
+        return (
+            <View className="flex-1 items-center justify-center bg-neutral-100 dark:bg-neutral-900">
+                <ActivityIndicator size="large" color={colors.primary} />
+                <Text className="mt-4 text-lg font-semibold text-neutral-900 dark:text-neutral-50">
+                    {t('map.loading_markers')}
+                </Text>
+            </View>
+        );
+    }
+
+    return (
+        <View className="flex-1">
+            <MapView
+                ref={mapRef}
+                provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : PROVIDER_DEFAULT}
+                style={StyleSheet.absoluteFillObject}
+                initialRegion={region}
+                onRegionChangeComplete={handleRegionChange}
+                onRegionChange={handleRegionChangeContinuous}
+                showsUserLocation={showsUserLocation}
+                showsMyLocationButton={false}
+                customMapStyle={customStyle}
+                mapType={effectiveMapType}
+                className="flex-1"
+                onMapReady={() => console.log('🗺️ Carte prête')}
+                loadingEnabled={true}
+                loadingIndicatorColor={colors.primary}
+                loadingBackgroundColor="#FFFFFF"
+                // Propriétés 3D et POI
+                pitchEnabled={true}
+                rotateEnabled={true}
+                showsPointsOfInterest={true}
+                showsBuildings={true}
+                showsIndoors={true}
+                camera={is3DEnabled && isNavigating ? {
+                    center: region,
+                    pitch: 45, // Inclinaison modérée
+                    heading: 0, // Direction de la caméra
+                    altitude: 1200, // Altitude moins profonde
+                    zoom: 15.5 // Zoom moins profond
+                } : undefined}
+            >
+                {/* Zone de Délimitation */}
+                {showsZoneBounds && zoneBounds?.polygonCoordinates && (
+                    <Polygon
+                        coordinates={zoneBounds.polygonCoordinates.map(coord => ({
+                            latitude: coord.lat,
+                            longitude: coord.lng,
+                        }))}
+                        strokeColor={colors.primary}
+                        strokeWidth={2}
+                        fillColor={`${colors.primary}20`}
+                    />
+                )}
+
+                {/* Bâtiments — pins invisibles avec callout natif Google Maps.
+                    Le pin le plus proche du centre caméra ouvre son callout automatiquement.
+                    opacity={0} rend le pin transparent tout en gardant showCallout() fonctionnel.
+                    tracksInfoWindowChanges={false} pour les performances (iOS Google Maps). */}
+                {buildingPolygons
+                    .filter((building) => visibilityDelta <= building.labelVisibleDelta)
+                    .map((building) => (
+                        <Marker
+                            key={`building-${building.id}`}
+                            ref={(ref) => {
+                                if (ref) markerRefs.current.set(building.id, ref as unknown as MapMarkerType);
+                                else markerRefs.current.delete(building.id);
+                            }}
+                            coordinate={building.center}
+                            title={building.nom}
+                            description={
+                                building.amodiataireName && building.amodiataireName !== building.nom
+                                    ? building.amodiataireName
+                                    : undefined
+                            }
+                            opacity={0}
+                            tracksViewChanges={false}
+                            tracksInfoWindowChanges={false}
+                            onPress={() => handleMarkerPress(building.amodiatairId)}
+                        />
+                    ))
+                }
+
+                {/* Polyline de Navigation */}
+                {(() => {
+                    if (!navigationRoute) return null;
+
+                    // Support pour les segments hybrides (Google + Backend + Internal)
+                    const segments = navigationRoute.segments || [
+                        { points: navigationRoute.polyline, type: 'google' }
+                    ];
+
+                    return (
+                        <>
+                            {segments.map((segment, index) => {
+                                if (!segment.points || segment.points.length === 0) return null;
+                                
+                                const type = segment.type;
+                                let strokeColor = '#7C3AED'; // Violet
+                                let strokeWidth = 4;
+
+                                if (type === 'backend') {
+                                    strokeColor = '#7C3AED'; // Violet
+                                    strokeWidth = 6;
+                                } else if (type === 'internal') {
+                                    strokeColor = '#7C3AED'; // Violet
+                                    strokeWidth = 6;
+                                }
+
+                                return (
+                                    <React.Fragment key={`nav-segment-${index}`}>
+                                        <Polyline
+                                            coordinates={segment.points}
+                                            strokeColor={strokeColor}
+                                            strokeWidth={strokeWidth}
+                                            lineJoin="round"
+                                            lineCap="round"
+                                        />
+                                        {/* Label pour le nom de la route (backend ou internal) */}
+                                        {(type === 'backend' || type === 'internal') && segment.name && segment.points.length > 0 && (
+                                            <Marker
+                                                coordinate={segment.points[Math.floor(segment.points.length / 2)]}
+                                                tracksViewChanges={false}
+                                                anchor={{ x: 0.5, y: 0.5 }}
+                                            >
+                                                <View style={{
+                                                    width: moderateScale(100),
+                                                    height: moderateScale(100),
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                }}>
+                                                    <View style={{
+                                                        backgroundColor: strokeColor,
+                                                        paddingHorizontal: moderateScale(8),
+                                                        paddingVertical: moderateScale(4),
+                                                        borderRadius: moderateScale(20),
+                                                        borderWidth: 1,
+                                                        borderColor: '#ffffff',
+                                                    }}>
+                                                        <Text style={{
+                                                            fontSize: moderateScale(10),
+                                                            fontWeight: 'bold',
+                                                            color: '#ffffff',
+                                                        }}>
+                                                            {segment.name}
+                                                        </Text>
+                                                    </View>
+                                                </View>
+                                            </Marker>
+                                        )}
+                                    </React.Fragment>
+                                );
+                            })}
+                            
+                            {/* Marqueur de destination (Point exact de l'amodiataire) */}
+                            {(navigationRoute.destinationCoordinates || (navigationRoute.polyline && navigationRoute.polyline.length > 0)) && (
+                                <Marker
+                                    coordinate={navigationRoute.destinationCoordinates || navigationRoute.polyline[navigationRoute.polyline.length - 1]}
+                                    title="Destination"
+                                    pinColor="#EF4444"
+                                />
+                            )}
+
+                            {/* Tracé du bâtiment de destination */}
+                            {navigationRoute.buildingCoordinates && navigationRoute.buildingCoordinates.length > 0 && (
+                                <Polygon
+                                    coordinates={navigationRoute.buildingCoordinates}
+                                    strokeColor="#F59E0B" // Orange pour correspondre au style Navipad
+                                    fillColor="rgba(245, 158, 11, 0.3)" // Orange semi-transparent
+                                    strokeWidth={2}
+                                />
+                            )}
+                        </>
+                    );
+                })()}
+
+                {/* Polyline du Calculateur de Distance */}
+                {distanceRoute && distanceRoute.polyline && distanceRoute.polyline.length > 0 && (
+                    <>
+                        {/* Tracé du bâtiment d'origine */}
+                        {distanceRoute.originMarker?.polygonCoordinates && distanceRoute.originMarker.polygonCoordinates.length > 0 && (
+                            <Polygon
+                                coordinates={distanceRoute.originMarker.polygonCoordinates.filter(c => c && typeof c.latitude === 'number' && typeof c.longitude === 'number')}
+                                strokeColor="#F59E0B"
+                                fillColor="rgba(245, 158, 11, 0.3)"
+                                strokeWidth={2}
+                            />
+                        )}
+
+                        {/* Tracé du bâtiment de destination */}
+                        {distanceRoute.destinationMarker?.polygonCoordinates && distanceRoute.destinationMarker.polygonCoordinates.length > 0 && (
+                            <Polygon
+                                coordinates={distanceRoute.destinationMarker.polygonCoordinates.filter(c => c && typeof c.latitude === 'number' && typeof c.longitude === 'number')}
+                                strokeColor="#F59E0B"
+                                fillColor="rgba(245, 158, 11, 0.3)"
+                                strokeWidth={2}
+                            />
+                        )}
+
+                        {/* Rendu des segments du calculateur si disponibles, sinon polyline unique */}
+                        {distanceRoute.segments ? (
+                            distanceRoute.segments.map((segment, index) => {
+                                if (!segment.points || segment.points.length === 0) return null;
+                                
+                                let strokeColor = '#7C3AED'; // Violet par défaut
+                                if (segment.type === 'backend') strokeColor = '#F59E0B';
+                                else if (segment.type === 'internal') strokeColor = '#3B82F6';
+
+                                return (
+                                    <Polyline
+                                        key={`dist-segment-${index}`}
+                                        coordinates={segment.points}
+                                        strokeColor={strokeColor}
+                                        strokeWidth={5}
+                                        lineDashPattern={segment.type === 'google' ? [1] : undefined}
+                                    />
+                                );
+                            })
+                        ) : (
+                            <Polyline
+                                coordinates={distanceRoute.polyline}
+                                strokeColor="#7C3AED"
+                                strokeWidth={5}
+                                lineDashPattern={[1]}
+                            />
+                        )}
+                        {/* Marqueur d'origine */}
+                        <Marker
+                                coordinate={distanceRoute.originMarker || distanceRoute.polyline[0]}
+                                title={distanceRoute.originMarker?.name || 'Départ'}
+                                tracksViewChanges={false}
+                        >
+                            <View style={{
+                                width: moderateScale(100),
+                                height: moderateScale(100),
+                                alignItems: 'center',
+                                justifyContent: 'flex-start',
+                                paddingTop: moderateScale(8),
+                            }}>
+                                <View style={{
+                                    backgroundColor: '#10B981',
+                                    paddingHorizontal: moderateScale(8),
+                                    paddingVertical: moderateScale(4),
+                                    borderRadius: moderateScale(6),
+                                    shadowColor: '#000',
+                                    shadowOffset: { width: 0, height: moderateScale(2) },
+                                    shadowOpacity: 0.2,
+                                    shadowRadius: moderateScale(3),
+                                    elevation: 4,
+                                }}>
+                                    <Text style={{
+                                        color: '#ffffff',
+                                        fontWeight: 'bold',
+                                        fontSize: moderateScale(10),
+                                    }} numberOfLines={1}>
+                                        {distanceRoute.originMarker?.name || 'A'}
+                                    </Text>
+                                </View>
+                                <View style={{
+                                    width: moderateScale(12),
+                                    height: moderateScale(12),
+                                    borderRadius: moderateScale(6),
+                                    backgroundColor: '#10B981',
+                                    borderWidth: moderateScale(2),
+                                    borderColor: '#ffffff',
+                                    marginTop: moderateScale(4),
+                                }} />
+                            </View>
+                        </Marker>
+                        {/* Marqueur de destination */}
+                        <Marker
+                                coordinate={distanceRoute.destinationMarker || distanceRoute.polyline[distanceRoute.polyline.length - 1]}
+                                title={distanceRoute.destinationMarker?.name || 'Arrivée'}
+                                tracksViewChanges={false}
+                        >
+                            <View style={{
+                                width: moderateScale(100),
+                                height: moderateScale(100),
+                                alignItems: 'center',
+                                justifyContent: 'flex-start',
+                                paddingTop: moderateScale(8),
+                            }}>
+                                <View style={{
+                                    backgroundColor: '#EF4444',
+                                    paddingHorizontal: moderateScale(8),
+                                    paddingVertical: moderateScale(4),
+                                    borderRadius: moderateScale(6),
+                                    shadowColor: '#000',
+                                    shadowOffset: { width: 0, height: moderateScale(2) },
+                                    shadowOpacity: 0.2,
+                                    shadowRadius: moderateScale(3),
+                                    elevation: 4,
+                                }}>
+                                    <Text style={{
+                                        color: '#ffffff',
+                                        fontWeight: 'bold',
+                                        fontSize: moderateScale(10),
+                                    }} numberOfLines={1}>
+                                        {distanceRoute.destinationMarker?.name || 'B'}
+                                    </Text>
+                                </View>
+                                <View style={{
+                                    width: moderateScale(12),
+                                    height: moderateScale(12),
+                                    borderRadius: moderateScale(6),
+                                    backgroundColor: '#EF4444',
+                                    borderWidth: moderateScale(2),
+                                    borderColor: '#ffffff',
+                                    marginTop: moderateScale(4),
+                                }} />
+                            </View>
+                        </Marker>
+                        {/* Label distance au milieu */}
+                        <Marker
+                                coordinate={distanceRoute.polyline[Math.floor(distanceRoute.polyline.length / 2)]}
+                                tracksViewChanges={false}
+                                anchor={{ x: 0.5, y: 0.5 }}
+                        >
+                            <View style={{
+                                width: moderateScale(100),
+                                height: moderateScale(100),
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}>
+                                <View style={{
+                                    backgroundColor: '#ffffff',
+                                    paddingHorizontal: moderateScale(12),
+                                    paddingVertical: moderateScale(6),
+                                    borderRadius: moderateScale(20),
+                                    shadowColor: '#000',
+                                    shadowOffset: { width: 0, height: moderateScale(2) },
+                                    shadowOpacity: 0.15,
+                                    shadowRadius: moderateScale(4),
+                                    elevation: 5,
+                                    borderWidth: 1,
+                                    borderColor: '#10B981',
+                                }}>
+                                    <Text style={{
+                                        color: '#059669',
+                                        fontWeight: 'bold',
+                                        fontSize: moderateScale(12),
+                                    }}>
+                                        {distanceRoute.distance}
+                                    </Text>
+                                </View>
+                            </View>
+                        </Marker>
+                    </>
+                )}
+            </MapView>
+
+            {/* Overlay labels — tous les bâtiments dans le champ de la caméra.
+                Animated.View pour le fondu entrée/sortie.
+                pointerEvents="box-none" : la View conteneur ne capte pas les
+                touches, seuls les labels individuels (TouchableOpacity) le font. */}
+            <Animated.View
+                style={[StyleSheet.absoluteFill, { opacity: overlayFadeAnim }]}
+                pointerEvents="box-none"
+            >
+                {overlayLabels.map((label) => (
+                    <AndroidBuildingLabel
+                        key={`overlay-${label.id}`}
+                        label={label}
+                        onPress={handleMarkerPress}
+                    />
+                ))}
+            </Animated.View>
+
+        </View>
+    );
+}

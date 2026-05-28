@@ -1,0 +1,151 @@
+workflows:
+  # ──────────────────────────────────────────────
+  # iOS Build
+  # ──────────────────────────────────────────────
+  ios-build:
+    name: iOS Build (no signing)
+    max_build_duration: 90
+    instance_type: mac_mini_m2
+    environment:
+      node: 20
+      xcode: latest
+      cocoapods: default
+      vars:
+        EXPO_PUBLIC_GOOGLE_MAPS_API_KEY: $GOOGLE_MAPS_API_KEY
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+    scripts:
+      - name: Install dependencies
+        script: |
+          npm ci || npm install
+
+      - name: Generate native project
+        script: |
+          npx expo prebuild --platform ios --clean
+
+      - name: Install CocoaPods
+        script: |
+          cd ios && pod install
+
+      - name: Build iOS (unsigned)
+        script: |
+          xcodebuild \
+            -workspace "ios/Navipad.xcworkspace" \
+            -scheme "Navipad" \
+            -configuration Release \
+            -destination "generic/platform=iOS" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            PROVISIONING_PROFILE="" \
+            build | xcpretty
+
+    artifacts:
+      - ios/build/**/*.app
+      - /tmp/xcodebuild_logs/*.log
+      - ios/build/Logs/**/*.log
+
+    publishing:
+      email:
+        recipients:
+          - team@navipad.com
+        notify:
+          success: true
+          failure: true
+
+  # ──────────────────────────────────────────────
+  # Android Build
+  # ──────────────────────────────────────────────
+  android-build:
+    name: Android Build
+    max_build_duration: 90
+    instance_type: mac_mini_m2
+    environment:
+      node: 20
+      java: 17
+      groups:
+        - app_credentials
+      vars:
+        EXPO_PUBLIC_GOOGLE_MAPS_API_KEY: $GOOGLE_MAPS_API_KEY
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+    scripts:
+      - name: Install dependencies
+        script: |
+          npm ci || npm install
+
+      - name: Generate native project
+        script: |
+          npx expo prebuild --platform android --clean
+
+      - name: Set Android version
+        script: |
+          LATEST_BUILD_NUMBER=$(( ${BUILD_NUMBER:-0} ))
+          cd android
+          echo "android.versionCode=$LATEST_BUILD_NUMBER" >> gradle.properties
+
+      - name: Build Android APK (debug)
+        script: |
+          cd android
+          ./gradlew assembleRelease
+
+      - name: Build Android AAB (release)
+        script: |
+          cd android
+          ./gradlew bundleRelease
+
+    artifacts:
+      - android/app/build/outputs/**/*.apk
+      - android/app/build/outputs/**/*.aab
+      - android/app/build/reports/**/*
+
+    publishing:
+      email:
+        recipients:
+          - team@navipad.com
+        notify:
+          success: true
+          failure: true
+
+  # ──────────────────────────────────────────────
+  # Android Preview (PR builds)
+  # ──────────────────────────────────────────────
+  android-preview:
+    name: Android Preview
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      node: 20
+      java: 17
+      vars:
+        EXPO_PUBLIC_GOOGLE_MAPS_API_KEY: $GOOGLE_MAPS_API_KEY
+    triggering:
+      events:
+        - pull_request
+      branch_patterns:
+        - pattern: main
+          include: true
+    scripts:
+      - name: Install dependencies
+        script: |
+          npm ci || npm install
+
+      - name: Generate native project
+        script: |
+          npx expo prebuild --platform android --clean
+
+      - name: Build debug APK
+        script: |
+          cd android
+          ./gradlew assembleDebug
+
+    artifacts:
+      - android/app/build/outputs/**/*.apk

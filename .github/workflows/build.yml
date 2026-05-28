@@ -1,0 +1,75 @@
+
+
+name: Build Navipad
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch: # Permet lancement manuel
+
+# Évite les builds en doublon sur la même branche
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ──────────────────────────────────────────────
+  # Build iOS (macOS runner, sans signing)
+  # ──────────────────────────────────────────────
+  build-ios:
+    name: iOS Build (unsigned)
+    runs-on: macos-15 # Apple Silicon M2 runner (Xcode 16+)
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci || npm install
+
+      - name: Generate native iOS project
+        run: npx expo prebuild --platform ios --clean
+
+      - name: Install CocoaPods
+        run: cd ios && pod install
+
+      - name: Build iOS (unsigned)
+        run: |
+          xcodebuild \
+            -workspace ios/Navipad.xcworkspace \
+            -scheme Navipad \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination "generic/platform=iOS" \
+            -archivePath ${{ runner.temp }}/Navipad.xcarchive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            PROVISIONING_PROFILE="" \
+            archive | xcpretty
+      - name: Package unsigned .ipa
+        run: |
+          APP_PATH=$(find ${{ runner.temp }}/Navipad.xcarchive -name "*.app" -type d | head -1)
+          if [ -n "$APP_PATH" ]; then
+            IPA_ROOT=${{ runner.temp }}/ipa-build
+            PAYLOAD_DIR=$IPA_ROOT/Payload
+            rm -rf "$IPA_ROOT"
+            mkdir -p "$PAYLOAD_DIR"
+            cp -R "$APP_PATH" "$PAYLOAD_DIR/"
+            cd "$IPA_ROOT"
+            zip -r ${{ runner.temp }}/navipad-unsigned-ios.ipa Payload
+          else
+            echo "No .app found in archive; cannot create .ipa"
+            exit 1
+          fi
+      - name: Upload iOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: navipad-ios-unsigned
+          path: ${{ runner.temp }}/navipad-unsigned-ios.ipa
+          retention-days: 14

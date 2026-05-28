@@ -1,0 +1,35 @@
+{
+  "name": "@navipad/api-analysis",
+  "version": "1.0.0",
+  "description": "API routes analysis tool for Navipad",
+  "private": true,
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "analyze": "ts-node cli.ts",
+    "analyze:json": "ts-node cli.ts --format json",
+    "analyze:html": "ts-node cli.ts --format html",
+    "analyze:verbose": "ts-node cli.ts --verbose",
+    "report-only": "ts-node cli.ts --report-only",
+    "update-plan": "ts-node cli.ts --update-plan-only"
+  },
+  "keywords": [
+    "api",
+    "analysis",
+    "testing",
+    "property-based-testing"
+  ],
+  "author": "",
+  "license": "0BSD",
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/yargs": "^17.0.33",
+    "fast-check": "^4.5.3",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.6",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
+    "yargs": "^17.7.2"
+  }
+}

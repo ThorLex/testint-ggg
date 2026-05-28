@@ -1,0 +1,12 @@
+/**
+ * Configuration globale de NativeWind
+ * 
+ * Ce fichier configure les styles CSS globaux pour NativeWind.
+ * 
+ * @module global.css
+ */
+
+/* Styles de base */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

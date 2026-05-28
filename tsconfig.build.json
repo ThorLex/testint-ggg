@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "exclude": [
+    "node_modules",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.property.test.ts",
+    "**/*.property.test.tsx",
+    "**/__tests__/**",
+    "src/test/**",
+    "src/models/test-models.ts",
+    "src/models/final-test.ts",
+    "src/models/validate-exports.js",
+    "tools/**"
+  ]
+}

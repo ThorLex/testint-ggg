@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(timeout 90 bash *)",
+      "Bash(npm install *)",
+      "PowerShell(Get-ChildItem -Path \"D:\\\\projets\\\\App\\\\Navipad\\\\src\" -Recurse | Where-Object { $_.Name -match \"BitmapLabel|Amodiataire\" } | Select-Object FullName)",
+      "PowerShell(Get-ChildItem -Path \"D:\\\\projets\\\\App\\\\Navipad\\\\src\" -Recurse | Where-Object { $_.Name -match \"hook|Hook\" -and \\($_.Extension -eq \".ts\" -or $_.Extension -eq \".tsx\"\\) } | Select-Object FullName | Where-Object { $_.FullName -match \"amodiataire\" -or $_.FullName -match \"Amodiataire\" })",
+      "Bash(dir D:\\\\projets\\\\App\\\\Navipad\\\\src /s /b)",
+      "Bash(findstr -i \"Bitmap\\\\|Label\\\\|factory\\\\|route\\\\|map\")",
+      "Bash(xargs grep -l \"routes\\\\|Route\\\\|road\\\\|Road\")"
+    ]
+  }
+}

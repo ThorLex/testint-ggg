@@ -1,0 +1,711 @@
+{
+  "metadata": {
+    "createdDate": "2026-02-26T11:15:58.203Z",
+    "estimatedEffort": "19 heurs",
+    "riskLevel": "HIGH"
+  },
+  "phases": [
+    {
+      "phase": 1,
+      "name": "API Routes Configuration",
+      "description": "Update ApiRoutes class with missing and incorrect route constants. This is the foundation for all other updates.",
+      "priority": "HIGH",
+      "estimatedTime": "1 heurs",
+      "tasks": [
+        {
+          "id": "ROUTE-001",
+          "title": "Fix incorrect path: AMODIATAIRES_ANNOUNCEMENTS",
+          "description": "Update route constant to match documented path: /api/mobile/amodiataires/:id/announcements. Current path \"/api/mobile/public/amodiataires/:id/announcements\" does not match documentation.",
+          "file": "src/services/api/routes.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "  static readonly AMODIATAIRES_ANNOUNCEMENTS = '/api/mobile/public/amodiataires/:id/announcements';",
+            "after": "  static readonly AMODIATAIRES_ANNOUNCEMENTS = '/api/mobile/amodiataires/:id/announcements';"
+          },
+          "affectedComponents": [
+            "Hooks using AMODIATAIRES_ANNOUNCEMENTS (analyze useApi.ts)"
+          ],
+          "testingNotes": "1. Update the route constant\n2. Test all hooks using this route: Hooks using AMODIATAIRES_ANNOUNCEMENTS (analyze useApi.ts)\n3. Verify API calls return expected data\n4. Check for any hardcoded URLs in components"
+        },
+        {
+          "id": "ROUTE-002",
+          "title": "Fix incorrect path: AMODIATAIRES_MEDIA",
+          "description": "Update route constant to match documented path: /api/mobile/amodiataires/:id/media. Current path \"/api/mobile/public/amodiataires/:id/media\" does not match documentation.",
+          "file": "src/services/api/routes.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "  static readonly AMODIATAIRES_MEDIA = '/api/mobile/public/amodiataires/:id/media';",
+            "after": "  static readonly AMODIATAIRES_MEDIA = '/api/mobile/amodiataires/:id/media';"
+          },
+          "affectedComponents": [
+            "Hooks using AMODIATAIRES_MEDIA (analyze useApi.ts)"
+          ],
+          "testingNotes": "1. Update the route constant\n2. Test all hooks using this route: Hooks using AMODIATAIRES_MEDIA (analyze useApi.ts)\n3. Verify API calls return expected data\n4. Check for any hardcoded URLs in components"
+        },
+        {
+          "id": "ROUTE-003",
+          "title": "Fix incorrect path: AMODIATAIRES_ANNOUNCEMENTS",
+          "description": "Update route constant to match documented path: /api/mobile/amodiataires/:id/announcements. Current path \"/api/mobile/public/amodiataires/:id/announcements\" does not match documentation.",
+          "file": "src/services/api/routes.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "  static readonly AMODIATAIRES_ANNOUNCEMENTS = '/api/mobile/public/amodiataires/:id/announcements';",
+            "after": "  static readonly AMODIATAIRES_ANNOUNCEMENTS = '/api/mobile/amodiataires/:id/announcements';"
+          },
+          "affectedComponents": [
+            "Hooks using AMODIATAIRES_ANNOUNCEMENTS (analyze useApi.ts)"
+          ],
+          "testingNotes": "1. Update the route constant\n2. Test all hooks using this route: Hooks using AMODIATAIRES_ANNOUNCEMENTS (analyze useApi.ts)\n3. Verify API calls return expected data\n4. Check for any hardcoded URLs in components"
+        },
+        {
+          "id": "ROUTE-004",
+          "title": "Fix incorrect path: AMODIATAIRES_MEDIA",
+          "description": "Update route constant to match documented path: /api/mobile/amodiataires/:id/media. Current path \"/api/mobile/public/amodiataires/:id/media\" does not match documentation.",
+          "file": "src/services/api/routes.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "  static readonly AMODIATAIRES_MEDIA = '/api/mobile/public/amodiataires/:id/media';",
+            "after": "  static readonly AMODIATAIRES_MEDIA = '/api/mobile/amodiataires/:id/media';"
+          },
+          "affectedComponents": [
+            "Hooks using AMODIATAIRES_MEDIA (analyze useApi.ts)"
+          ],
+          "testingNotes": "1. Update the route constant\n2. Test all hooks using this route: Hooks using AMODIATAIRES_MEDIA (analyze useApi.ts)\n3. Verify API calls return expected data\n4. Check for any hardcoded URLs in components"
+        }
+      ]
+    },
+    {
+      "phase": 2,
+      "name": "TypeScript Interfaces",
+      "description": "Create and update TypeScript interfaces to match API documentation. These interfaces ensure type safety throughout the application.",
+      "priority": "CRITICAL",
+      "estimatedTime": "5 heurs",
+      "tasks": [
+        {
+          "id": "TYPE-001",
+          "title": "Create interface: ProfilePutResponse",
+          "description": "Create TypeScript interface for ProfilePutResponse based on API documentation. This interface represents the response structure for the corresponding API endpoint.",
+          "file": "src/types/api.ts",
+          "type": "ADD",
+          "codeExample": {
+            "after": "export interface ProfilePutResponse {\n  success: boolean;\n  message: string;\n  status: string;\n}"
+          },
+          "affectedComponents": [],
+          "testingNotes": "1. Add the interface to src/types/api.ts\n2. Verify TypeScript compilation succeeds\n3. Test with actual API response data\n4. Verify all property types are correct"
+        },
+        {
+          "id": "TYPE-002",
+          "title": "Create interface: SubmitValidationPostResponse",
+          "description": "Create TypeScript interface for SubmitValidationPostResponse based on API documentation. This interface represents the response structure for the corresponding API endpoint.",
+          "file": "src/types/api.ts",
+          "type": "ADD",
+          "codeExample": {
+            "after": "export interface SubmitValidationPostResponse {\n  success: boolean;\n  message: string;\n  count: number;\n}"
+          },
+          "affectedComponents": [],
+          "testingNotes": "1. Add the interface to src/types/api.ts\n2. Verify TypeScript compilation succeeds\n3. Test with actual API response data\n4. Verify all property types are correct"
+        },
+        {
+          "id": "TYPE-003",
+          "title": "Add property: AnnouncementsListResponse.success",
+          "description": "Add missing property success to AnnouncementsListResponse interface. This property is documented in the API but missing from the TypeScript interface.",
+          "file": "src/types/api.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "export interface AnnouncementsListResponse {\n  // ... existing properties\n}",
+            "after": "export interface AnnouncementsListResponse {\n  // ... existing properties\n  success: boolean;\n}"
+          },
+          "affectedComponents": [
+            "Components using AnnouncementsListResponse (analyze component files)"
+          ],
+          "testingNotes": "1. Add the property to the interface\n2. Update components to use the new property: Components using AnnouncementsListResponse (analyze component files)\n3. Test that the property is correctly populated from API responses\n4. Ensure property is always present"
+        },
+        {
+          "id": "TYPE-004",
+          "title": "Add property: AnnouncementsListResponse.count",
+          "description": "Add missing property count to AnnouncementsListResponse interface. This property is documented in the API but missing from the TypeScript interface.",
+          "file": "src/types/api.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "export interface AnnouncementsListResponse {\n  // ... existing properties\n}",
+            "after": "export interface AnnouncementsListResponse {\n  // ... existing properties\n  count: number;\n}"
+          },
+          "affectedComponents": [
+            "Components using AnnouncementsListResponse (analyze component files)"
+          ],
+          "testingNotes": "1. Add the property to the interface\n2. Update components to use the new property: Components using AnnouncementsListResponse (analyze component files)\n3. Test that the property is correctly populated from API responses\n4. Ensure property is always present"
+        },
+        {
+          "id": "TYPE-005",
+          "title": "Add property: AnnouncementsListResponse.announcements",
+          "description": "Add missing property announcements to AnnouncementsListResponse interface. This property is documented in the API but missing from the TypeScript interface.",
+          "file": "src/types/api.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "export interface AnnouncementsListResponse {\n  // ... existing properties\n}",
+            "after": "export interface AnnouncementsListResponse {\n  // ... existing properties\n  announcements: object[];\n}"
+          },
+          "affectedComponents": [
+            "Components using AnnouncementsListResponse (analyze component files)"
+          ],
+          "testingNotes": "1. Add the property to the interface\n2. Update components to use the new property: Components using AnnouncementsListResponse (analyze component files)\n3. Test that the property is correctly populated from API responses\n4. Ensure property is always present"
+        },
+        {
+          "id": "TYPE-006",
+          "title": "Add property: MediaListResponse.count",
+          "description": "Add missing property count to MediaListResponse interface. This property is documented in the API but missing from the TypeScript interface.",
+          "file": "src/types/api.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "export interface MediaListResponse {\n  // ... existing properties\n}",
+            "after": "export interface MediaListResponse {\n  // ... existing properties\n  count: number;\n}"
+          },
+          "affectedComponents": [
+            "Components using MediaListResponse (analyze component files)"
+          ],
+          "testingNotes": "1. Add the property to the interface\n2. Update components to use the new property: Components using MediaListResponse (analyze component files)\n3. Test that the property is correctly populated from API responses\n4. Ensure property is always present"
+        },
+        {
+          "id": "TYPE-007",
+          "title": "Add property: MediaPostResponse.success",
+          "description": "Add missing property success to MediaPostResponse interface. This property is documented in the API but missing from the TypeScript interface.",
+          "file": "src/types/api.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "export interface MediaPostResponse {\n  // ... existing properties\n}",
+            "after": "export interface MediaPostResponse {\n  // ... existing properties\n  success: boolean;\n}"
+          },
+          "affectedComponents": [
+            "Components using MediaPostResponse (analyze component files)"
+          ],
+          "testingNotes": "1. Add the property to the interface\n2. Update components to use the new property: Components using MediaPostResponse (analyze component files)\n3. Test that the property is correctly populated from API responses\n4. Ensure property is always present"
+        },
+        {
+          "id": "TYPE-008",
+          "title": "Add property: MediaPostResponse.message",
+          "description": "Add missing property message to MediaPostResponse interface. This property is documented in the API but missing from the TypeScript interface.",
+          "file": "src/types/api.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "export interface MediaPostResponse {\n  // ... existing properties\n}",
+            "after": "export interface MediaPostResponse {\n  // ... existing properties\n  message: string;\n}"
+          },
+          "affectedComponents": [
+            "Components using MediaPostResponse (analyze component files)"
+          ],
+          "testingNotes": "1. Add the property to the interface\n2. Update components to use the new property: Components using MediaPostResponse (analyze component files)\n3. Test that the property is correctly populated from API responses\n4. Ensure property is always present"
+        },
+        {
+          "id": "TYPE-009",
+          "title": "Add property: MediaPostResponse.media",
+          "description": "Add missing property media to MediaPostResponse interface. This property is documented in the API but missing from the TypeScript interface.",
+          "file": "src/types/api.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "export interface MediaPostResponse {\n  // ... existing properties\n}",
+            "after": "export interface MediaPostResponse {\n  // ... existing properties\n  media: MediaDetail;\n}"
+          },
+          "affectedComponents": [
+            "Components using MediaPostResponse (analyze component files)"
+          ],
+          "testingNotes": "1. Add the property to the interface\n2. Update components to use the new property: Components using MediaPostResponse (analyze component files)\n3. Test that the property is correctly populated from API responses\n4. Ensure property is always present"
+        },
+        {
+          "id": "TYPE-010",
+          "title": "Add property: MediaResponse.success",
+          "description": "Add missing property success to MediaResponse interface. This property is documented in the API but missing from the TypeScript interface.",
+          "file": "src/types/api.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "export interface MediaResponse {\n  // ... existing properties\n}",
+            "after": "export interface MediaResponse {\n  // ... existing properties\n  success: boolean;\n}"
+          },
+          "affectedComponents": [
+            "Components using MediaResponse (analyze component files)"
+          ],
+          "testingNotes": "1. Add the property to the interface\n2. Update components to use the new property: Components using MediaResponse (analyze component files)\n3. Test that the property is correctly populated from API responses\n4. Ensure property is always present"
+        },
+        {
+          "id": "TYPE-011",
+          "title": "Add property: MediaResponse.media",
+          "description": "Add missing property media to MediaResponse interface. This property is documented in the API but missing from the TypeScript interface.",
+          "file": "src/types/api.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "export interface MediaResponse {\n  // ... existing properties\n}",
+            "after": "export interface MediaResponse {\n  // ... existing properties\n  media: MediaDetail[];\n}"
+          },
+          "affectedComponents": [
+            "Components using MediaResponse (analyze component files)"
+          ],
+          "testingNotes": "1. Add the property to the interface\n2. Update components to use the new property: Components using MediaResponse (analyze component files)\n3. Test that the property is correctly populated from API responses\n4. Ensure property is always present"
+        },
+        {
+          "id": "TYPE-012",
+          "title": "Add property: AnnouncementsPostResponse.success",
+          "description": "Add missing property success to AnnouncementsPostResponse interface. This property is documented in the API but missing from the TypeScript interface.",
+          "file": "src/types/api.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "export interface AnnouncementsPostResponse {\n  // ... existing properties\n}",
+            "after": "export interface AnnouncementsPostResponse {\n  // ... existing properties\n  success: boolean;\n}"
+          },
+          "affectedComponents": [
+            "Components using AnnouncementsPostResponse (analyze component files)"
+          ],
+          "testingNotes": "1. Add the property to the interface\n2. Update components to use the new property: Components using AnnouncementsPostResponse (analyze component files)\n3. Test that the property is correctly populated from API responses\n4. Ensure property is always present"
+        },
+        {
+          "id": "TYPE-013",
+          "title": "Add property: AnnouncementsPostResponse.announcement",
+          "description": "Add missing property announcement to AnnouncementsPostResponse interface. This property is documented in the API but missing from the TypeScript interface.",
+          "file": "src/types/api.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "export interface AnnouncementsPostResponse {\n  // ... existing properties\n}",
+            "after": "export interface AnnouncementsPostResponse {\n  // ... existing properties\n  announcement: object;\n}"
+          },
+          "affectedComponents": [
+            "Components using AnnouncementsPostResponse (analyze component files)"
+          ],
+          "testingNotes": "1. Add the property to the interface\n2. Update components to use the new property: Components using AnnouncementsPostResponse (analyze component files)\n3. Test that the property is correctly populated from API responses\n4. Ensure property is always present"
+        },
+        {
+          "id": "TYPE-014",
+          "title": "Add property: AnnouncementsResponse.success",
+          "description": "Add missing property success to AnnouncementsResponse interface. This property is documented in the API but missing from the TypeScript interface.",
+          "file": "src/types/api.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "export interface AnnouncementsResponse {\n  // ... existing properties\n}",
+            "after": "export interface AnnouncementsResponse {\n  // ... existing properties\n  success: boolean;\n}"
+          },
+          "affectedComponents": [
+            "Components using AnnouncementsResponse (analyze component files)"
+          ],
+          "testingNotes": "1. Add the property to the interface\n2. Update components to use the new property: Components using AnnouncementsResponse (analyze component files)\n3. Test that the property is correctly populated from API responses\n4. Ensure property is always present"
+        },
+        {
+          "id": "TYPE-015",
+          "title": "Add property: AnnouncementsResponse.announcements",
+          "description": "Add missing property announcements to AnnouncementsResponse interface. This property is documented in the API but missing from the TypeScript interface.",
+          "file": "src/types/api.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "export interface AnnouncementsResponse {\n  // ... existing properties\n}",
+            "after": "export interface AnnouncementsResponse {\n  // ... existing properties\n  announcements: object[];\n}"
+          },
+          "affectedComponents": [
+            "Components using AnnouncementsResponse (analyze component files)"
+          ],
+          "testingNotes": "1. Add the property to the interface\n2. Update components to use the new property: Components using AnnouncementsResponse (analyze component files)\n3. Test that the property is correctly populated from API responses\n4. Ensure property is always present"
+        }
+      ]
+    },
+    {
+      "phase": 3,
+      "name": "React Query Hooks",
+      "description": "Create and update React Query hooks for API endpoints. These hooks provide data fetching, caching, and state management.",
+      "priority": "HIGH",
+      "estimatedTime": "10 heurs 30 minutes",
+      "tasks": [
+        {
+          "id": "HOOK-001",
+          "title": "Create hook: useCreateMobileAnnouncements",
+          "description": "Create React Query mutation hook for POST /api/mobile/announcements. Crée une nouvelle annonce et la soumet automatiquement pour validation.",
+          "file": "src/hooks/useApi.ts",
+          "type": "ADD",
+          "codeExample": {
+            "after": "/**\n * Hook for Crée une nouvelle annonce et la soumet automatiquement pour validation.\n * POST /api/mobile/announcements\n */\nexport function useCreateMobileAnnouncements() {\n  const queryClient = useQueryClient();\n  \n  return useMutation({\n    mutationFn: (data: RequestType) =>\n      post(ApiRoutes.ANNOUNCEMENTS, data),\n    onSuccess: () => {\n      // Invalidate relevant queries to refresh data\n      queryClient.invalidateQueries({ queryKey: [\"mobile\",\"announcements\"] });\n    },\n  });\n}"
+          },
+          "affectedComponents": [],
+          "testingNotes": "1. Add the hook to src/hooks/useApi.ts\n2. Verify ANNOUNCEMENTS route constant exists\n3. Verify AnnouncementsListResponse interface exists\n4. Test hook with real API calls\n5. Verify query key is unique: [\"mobile\",\"announcements\"]\n6. Test mutation success and cache invalidation\n7. Test error handling scenarios"
+        },
+        {
+          "id": "HOOK-002",
+          "title": "Fix route in hook: useNearbyAmodiataires",
+          "description": "Update useNearbyAmodiataires to use correct route constant /api/mobile/public/amodiataires instead of /api/mobile/public/amodiataires/nearby. This ensures the hook calls the correct API endpoint.",
+          "file": "src/hooks/useApi.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "    queryFn: () => get(ApiRoutes./api/mobile/public/amodiataires/nearby),",
+            "after": "    queryFn: () => get(ApiRoutes./api/mobile/public/amodiataires),"
+          },
+          "affectedComponents": [
+            "Components using useNearbyAmodiataires (analyze component files)"
+          ],
+          "testingNotes": "1. Update the route constant in the hook\n2. Verify /api/mobile/public/amodiataires exists in ApiRoutes\n3. Test hook returns correct data from updated endpoint\n4. Test in components: Components using useNearbyAmodiataires (analyze component files)\n5. Verify no breaking changes in response structure"
+        },
+        {
+          "id": "HOOK-003",
+          "title": "Fix route in hook: useAmodiataireAnnouncements",
+          "description": "Update useAmodiataireAnnouncements to use correct route constant /api/mobile/amodiataires/:id/announcements instead of getAmodiataireAnnouncementsUrl. This ensures the hook calls the correct API endpoint.",
+          "file": "src/hooks/useApi.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "    queryFn: () => get(ApiRoutes.getAmodiataireAnnouncementsUrl),",
+            "after": "    queryFn: () => get(ApiRoutes./api/mobile/amodiataires/:id/announcements),"
+          },
+          "affectedComponents": [
+            "Components using useAmodiataireAnnouncements (analyze component files)"
+          ],
+          "testingNotes": "1. Update the route constant in the hook\n2. Verify /api/mobile/amodiataires/:id/announcements exists in ApiRoutes\n3. Test hook returns correct data from updated endpoint\n4. Test in components: Components using useAmodiataireAnnouncements (analyze component files)\n5. Verify no breaking changes in response structure"
+        },
+        {
+          "id": "HOOK-004",
+          "title": "Fix route in hook: useAmodiataireMedia",
+          "description": "Update useAmodiataireMedia to use correct route constant /api/mobile/amodiataires/:id/media instead of getAmodiataireMediaUrl. This ensures the hook calls the correct API endpoint.",
+          "file": "src/hooks/useApi.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "    queryFn: () => get(ApiRoutes.getAmodiataireMediaUrl),",
+            "after": "    queryFn: () => get(ApiRoutes./api/mobile/amodiataires/:id/media),"
+          },
+          "affectedComponents": [
+            "Components using useAmodiataireMedia (analyze component files)"
+          ],
+          "testingNotes": "1. Update the route constant in the hook\n2. Verify /api/mobile/amodiataires/:id/media exists in ApiRoutes\n3. Test hook returns correct data from updated endpoint\n4. Test in components: Components using useAmodiataireMedia (analyze component files)\n5. Verify no breaking changes in response structure"
+        },
+        {
+          "id": "HOOK-005",
+          "title": "Fix route in hook: useAmodiatairesMinimal",
+          "description": "Update useAmodiatairesMinimal to use correct route constant /api/mobile/public/amodiataires instead of getAmodiatairesMinimalUrl. This ensures the hook calls the correct API endpoint.",
+          "file": "src/hooks/useApi.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "    queryFn: () => get(ApiRoutes.getAmodiatairesMinimalUrl),",
+            "after": "    queryFn: () => get(ApiRoutes./api/mobile/public/amodiataires),"
+          },
+          "affectedComponents": [
+            "Components using useAmodiatairesMinimal (analyze component files)"
+          ],
+          "testingNotes": "1. Update the route constant in the hook\n2. Verify /api/mobile/public/amodiataires exists in ApiRoutes\n3. Test hook returns correct data from updated endpoint\n4. Test in components: Components using useAmodiatairesMinimal (analyze component files)\n5. Verify no breaking changes in response structure"
+        },
+        {
+          "id": "HOOK-006",
+          "title": "Fix route in hook: useAmodiatairesCoordinates",
+          "description": "Update useAmodiatairesCoordinates to use correct route constant /api/mobile/public/amodiataires instead of getAmodiatairesCoordinatesUrl. This ensures the hook calls the correct API endpoint.",
+          "file": "src/hooks/useApi.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "    queryFn: () => get(ApiRoutes.getAmodiatairesCoordinatesUrl),",
+            "after": "    queryFn: () => get(ApiRoutes./api/mobile/public/amodiataires),"
+          },
+          "affectedComponents": [
+            "Components using useAmodiatairesCoordinates (analyze component files)"
+          ],
+          "testingNotes": "1. Update the route constant in the hook\n2. Verify /api/mobile/public/amodiataires exists in ApiRoutes\n3. Test hook returns correct data from updated endpoint\n4. Test in components: Components using useAmodiatairesCoordinates (analyze component files)\n5. Verify no breaking changes in response structure"
+        },
+        {
+          "id": "HOOK-007",
+          "title": "Fix route in hook: useAmodiatairesSearch",
+          "description": "Update useAmodiatairesSearch to use correct route constant /api/mobile/public/amodiataires instead of getAmodiatairesSearch. This ensures the hook calls the correct API endpoint.",
+          "file": "src/hooks/useApi.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "    queryFn: () => get(ApiRoutes.getAmodiatairesSearch),",
+            "after": "    queryFn: () => get(ApiRoutes./api/mobile/public/amodiataires),"
+          },
+          "affectedComponents": [
+            "Components using useAmodiatairesSearch (analyze component files)"
+          ],
+          "testingNotes": "1. Update the route constant in the hook\n2. Verify /api/mobile/public/amodiataires exists in ApiRoutes\n3. Test hook returns correct data from updated endpoint\n4. Test in components: Components using useAmodiatairesSearch (analyze component files)\n5. Verify no breaking changes in response structure"
+        },
+        {
+          "id": "HOOK-008",
+          "title": "Fix route in hook: useUploadMedia",
+          "description": "Update useUploadMedia to use correct route constant /api/mobile/media instead of . This ensures the hook calls the correct API endpoint.",
+          "file": "src/hooks/useApi.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "    queryFn: () => get(ApiRoutes.),",
+            "after": "    queryFn: () => get(ApiRoutes./api/mobile/media),"
+          },
+          "affectedComponents": [
+            "Components using useUploadMedia (analyze component files)"
+          ],
+          "testingNotes": "1. Update the route constant in the hook\n2. Verify /api/mobile/media exists in ApiRoutes\n3. Test hook returns correct data from updated endpoint\n4. Test in components: Components using useUploadMedia (analyze component files)\n5. Verify no breaking changes in response structure"
+        },
+        {
+          "id": "HOOK-009",
+          "title": "Fix route in hook: useMediaList",
+          "description": "Update useMediaList to use correct route constant /api/mobile/amodiataires/:id/media instead of /api/mobile/media. This ensures the hook calls the correct API endpoint.",
+          "file": "src/hooks/useApi.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "    queryFn: () => get(ApiRoutes./api/mobile/media),",
+            "after": "    queryFn: () => get(ApiRoutes./api/mobile/amodiataires/:id/media),"
+          },
+          "affectedComponents": [
+            "Components using useMediaList (analyze component files)"
+          ],
+          "testingNotes": "1. Update the route constant in the hook\n2. Verify /api/mobile/amodiataires/:id/media exists in ApiRoutes\n3. Test hook returns correct data from updated endpoint\n4. Test in components: Components using useMediaList (analyze component files)\n5. Verify no breaking changes in response structure"
+        },
+        {
+          "id": "HOOK-010",
+          "title": "Fix route in hook: useDeleteMedia",
+          "description": "Update useDeleteMedia to use correct route constant /api/mobile/media instead of getDeleteMediaUrl. This ensures the hook calls the correct API endpoint.",
+          "file": "src/hooks/useApi.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "    queryFn: () => get(ApiRoutes.getDeleteMediaUrl),",
+            "after": "    queryFn: () => get(ApiRoutes./api/mobile/media),"
+          },
+          "affectedComponents": [
+            "Components using useDeleteMedia (analyze component files)"
+          ],
+          "testingNotes": "1. Update the route constant in the hook\n2. Verify /api/mobile/media exists in ApiRoutes\n3. Test hook returns correct data from updated endpoint\n4. Test in components: Components using useDeleteMedia (analyze component files)\n5. Verify no breaking changes in response structure"
+        },
+        {
+          "id": "HOOK-011",
+          "title": "Fix route in hook: useSubmitMediaValidation",
+          "description": "Update useSubmitMediaValidation to use correct route constant /api/mobile/media instead of /api/mobile/media/submit-validation. This ensures the hook calls the correct API endpoint.",
+          "file": "src/hooks/useApi.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "    queryFn: () => get(ApiRoutes./api/mobile/media/submit-validation),",
+            "after": "    queryFn: () => get(ApiRoutes./api/mobile/media),"
+          },
+          "affectedComponents": [
+            "Components using useSubmitMediaValidation (analyze component files)"
+          ],
+          "testingNotes": "1. Update the route constant in the hook\n2. Verify /api/mobile/media exists in ApiRoutes\n3. Test hook returns correct data from updated endpoint\n4. Test in components: Components using useSubmitMediaValidation (analyze component files)\n5. Verify no breaking changes in response structure"
+        },
+        {
+          "id": "HOOK-012",
+          "title": "Fix route in hook: useAnnouncementsList",
+          "description": "Update useAnnouncementsList to use correct route constant /api/mobile/amodiataires/:id/announcements instead of /api/mobile/announcements. This ensures the hook calls the correct API endpoint.",
+          "file": "src/hooks/useApi.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "    queryFn: () => get(ApiRoutes./api/mobile/announcements),",
+            "after": "    queryFn: () => get(ApiRoutes./api/mobile/amodiataires/:id/announcements),"
+          },
+          "affectedComponents": [
+            "Components using useAnnouncementsList (analyze component files)"
+          ],
+          "testingNotes": "1. Update the route constant in the hook\n2. Verify /api/mobile/amodiataires/:id/announcements exists in ApiRoutes\n3. Test hook returns correct data from updated endpoint\n4. Test in components: Components using useAnnouncementsList (analyze component files)\n5. Verify no breaking changes in response structure"
+        },
+        {
+          "id": "HOOK-013",
+          "title": "Add parameters to hook: useAmodiatairesMinimal",
+          "description": "Update useAmodiatairesMinimal to accept query parameters: , , . This enables filtering, pagination, and search functionality.",
+          "file": "src/hooks/useApi.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "export function useAmodiatairesMinimal() {\n  return useQuery({\n    queryKey: ['data'],\n    queryFn: () => get(ApiRoutes.ROUTE),\n  });\n}",
+            "after": "export function useAmodiatairesMinimal(params?: QueryParams) {\n  return useQuery({\n    queryKey: ['data', params],\n    queryFn: () => get(ApiRoutes.getFullUrl(ApiRoutes.ROUTE, params)),\n    staleTime: 5 * 60 * 1000,\n  });\n}"
+          },
+          "affectedComponents": [
+            "Components using useAmodiatairesMinimal (analyze component files)"
+          ],
+          "testingNotes": "1. Add params parameter to hook signature\n2. Update query key to include params\n3. Use ApiRoutes.getFullUrl() to append query parameters\n4. Create/verify QueryParams interface exists\n5. Test with various parameter combinations\n6. Update components to pass parameters: Components using useAmodiatairesMinimal (analyze component files)\n7. Test pagination, filtering, and search functionality"
+        },
+        {
+          "id": "HOOK-014",
+          "title": "Add parameters to hook: useAmodiatairesCoordinates",
+          "description": "Update useAmodiatairesCoordinates to accept query parameters: , , . This enables filtering, pagination, and search functionality.",
+          "file": "src/hooks/useApi.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "export function useAmodiatairesCoordinates() {\n  return useQuery({\n    queryKey: ['data'],\n    queryFn: () => get(ApiRoutes.ROUTE),\n  });\n}",
+            "after": "export function useAmodiatairesCoordinates(params?: QueryParams) {\n  return useQuery({\n    queryKey: ['data', params],\n    queryFn: () => get(ApiRoutes.getFullUrl(ApiRoutes.ROUTE, params)),\n    staleTime: 5 * 60 * 1000,\n  });\n}"
+          },
+          "affectedComponents": [
+            "Components using useAmodiatairesCoordinates (analyze component files)"
+          ],
+          "testingNotes": "1. Add params parameter to hook signature\n2. Update query key to include params\n3. Use ApiRoutes.getFullUrl() to append query parameters\n4. Create/verify QueryParams interface exists\n5. Test with various parameter combinations\n6. Update components to pass parameters: Components using useAmodiatairesCoordinates (analyze component files)\n7. Test pagination, filtering, and search functionality"
+        },
+        {
+          "id": "HOOK-015",
+          "title": "Add parameters to hook: useAmodiatairesSearch",
+          "description": "Update useAmodiatairesSearch to accept query parameters: , , . This enables filtering, pagination, and search functionality.",
+          "file": "src/hooks/useApi.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "export function useAmodiatairesSearch() {\n  return useQuery({\n    queryKey: ['data'],\n    queryFn: () => get(ApiRoutes.ROUTE),\n  });\n}",
+            "after": "export function useAmodiatairesSearch(params?: QueryParams) {\n  return useQuery({\n    queryKey: ['data', params],\n    queryFn: () => get(ApiRoutes.getFullUrl(ApiRoutes.ROUTE, params)),\n    staleTime: 5 * 60 * 1000,\n  });\n}"
+          },
+          "affectedComponents": [
+            "Components using useAmodiatairesSearch (analyze component files)"
+          ],
+          "testingNotes": "1. Add params parameter to hook signature\n2. Update query key to include params\n3. Use ApiRoutes.getFullUrl() to append query parameters\n4. Create/verify QueryParams interface exists\n5. Test with various parameter combinations\n6. Update components to pass parameters: Components using useAmodiatairesSearch (analyze component files)\n7. Test pagination, filtering, and search functionality"
+        },
+        {
+          "id": "HOOK-016",
+          "title": "Fix query key in hook: useAmodiatairesMinimal",
+          "description": "Update query key to be unique and include relevant parameters. Current key may cause cache collisions or incorrect data updates.",
+          "file": "src/hooks/useApi.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "    queryKey: ['data'],",
+            "after": "    queryKey: [\"useamodiatairesminimal\"],"
+          },
+          "affectedComponents": [
+            "Components using useAmodiatairesMinimal (analyze component files)"
+          ],
+          "testingNotes": "1. Update the query key to be more specific\n2. Include all parameters that differentiate cached data\n3. Test cache invalidation works correctly\n4. Verify no duplicate cache entries\n5. Test in components: Components using useAmodiatairesMinimal (analyze component files)\n6. Verify data refreshes when parameters change"
+        },
+        {
+          "id": "HOOK-017",
+          "title": "Fix query key in hook: useAmodiatairesCoordinates",
+          "description": "Update query key to be unique and include relevant parameters. Current key may cause cache collisions or incorrect data updates.",
+          "file": "src/hooks/useApi.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "    queryKey: ['data'],",
+            "after": "    queryKey: [\"useamodiatairescoordinates\"],"
+          },
+          "affectedComponents": [
+            "Components using useAmodiatairesCoordinates (analyze component files)"
+          ],
+          "testingNotes": "1. Update the query key to be more specific\n2. Include all parameters that differentiate cached data\n3. Test cache invalidation works correctly\n4. Verify no duplicate cache entries\n5. Test in components: Components using useAmodiatairesCoordinates (analyze component files)\n6. Verify data refreshes when parameters change"
+        },
+        {
+          "id": "HOOK-018",
+          "title": "Fix query key in hook: useMapData",
+          "description": "Update query key to be unique and include relevant parameters. Current key may cause cache collisions or incorrect data updates.",
+          "file": "src/hooks/useApi.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "    queryKey: ['data'],",
+            "after": "    queryKey: [\"usemapdata\"],"
+          },
+          "affectedComponents": [
+            "Components using useMapData (analyze component files)"
+          ],
+          "testingNotes": "1. Update the query key to be more specific\n2. Include all parameters that differentiate cached data\n3. Test cache invalidation works correctly\n4. Verify no duplicate cache entries\n5. Test in components: Components using useMapData (analyze component files)\n6. Verify data refreshes when parameters change"
+        },
+        {
+          "id": "HOOK-019",
+          "title": "Fix query key in hook: useZoneBounds",
+          "description": "Update query key to be unique and include relevant parameters. Current key may cause cache collisions or incorrect data updates.",
+          "file": "src/hooks/useApi.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "    queryKey: ['data'],",
+            "after": "    queryKey: [\"usezonebounds\"],"
+          },
+          "affectedComponents": [
+            "Components using useZoneBounds (analyze component files)"
+          ],
+          "testingNotes": "1. Update the query key to be more specific\n2. Include all parameters that differentiate cached data\n3. Test cache invalidation works correctly\n4. Verify no duplicate cache entries\n5. Test in components: Components using useZoneBounds (analyze component files)\n6. Verify data refreshes when parameters change"
+        },
+        {
+          "id": "HOOK-020",
+          "title": "Add cache invalidation to: useLogin",
+          "description": "Add onSuccess callback with cache invalidation to mutation hook. This ensures UI updates automatically after data changes.",
+          "file": "src/hooks/useApi.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "export function useLogin() {\n  return useMutation({\n    mutationFn: (data) => post(ApiRoutes.ROUTE, data),\n  });\n}",
+            "after": "export function useLogin() {\n  const queryClient = useQueryClient();\n  \n  return useMutation({\n    mutationFn: (data) => post(ApiRoutes.ROUTE, data),\n    onSuccess: () => {\n      // Invalidate related queries to refresh data\n      queryClient.invalidateQueries({ queryKey: [\"login\",\"list\"] });\n      queryClient.invalidateQueries({ queryKey: [\"login\",\"detail\"] });\n    },\n  });\n}"
+          },
+          "affectedComponents": [
+            "Components using useLogin (analyze component files)"
+          ],
+          "testingNotes": "1. Import useQueryClient from @tanstack/react-query\n2. Add onSuccess callback with invalidateQueries\n3. Identify all related query keys that should be invalidated: [\"login\",\"list\"], [\"login\",\"detail\"]\n4. Test that data refreshes automatically after mutation\n5. Test in components: Components using useLogin (analyze component files)\n6. Verify no unnecessary refetches occur"
+        },
+        {
+          "id": "HOOK-021",
+          "title": "Add cache invalidation to: useLogout",
+          "description": "Add onSuccess callback with cache invalidation to mutation hook. This ensures UI updates automatically after data changes.",
+          "file": "src/hooks/useApi.ts",
+          "type": "MODIFY",
+          "codeExample": {
+            "before": "export function useLogout() {\n  return useMutation({\n    mutationFn: (data) => post(ApiRoutes.ROUTE, data),\n  });\n}",
+            "after": "export function useLogout() {\n  const queryClient = useQueryClient();\n  \n  return useMutation({\n    mutationFn: (data) => post(ApiRoutes.ROUTE, data),\n    onSuccess: () => {\n      // Invalidate related queries to refresh data\n      queryClient.invalidateQueries({ queryKey: [\"logout\",\"list\"] });\n      queryClient.invalidateQueries({ queryKey: [\"logout\",\"detail\"] });\n    },\n  });\n}"
+          },
+          "affectedComponents": [
+            "Components using useLogout (analyze component files)"
+          ],
+          "testingNotes": "1. Import useQueryClient from @tanstack/react-query\n2. Add onSuccess callback with invalidateQueries\n3. Identify all related query keys that should be invalidated: [\"logout\",\"list\"], [\"logout\",\"detail\"]\n4. Test that data refreshes automatically after mutation\n5. Test in components: Components using useLogout (analyze component files)\n6. Verify no unnecessary refetches occur"
+        }
+      ]
+    },
+    {
+      "phase": 5,
+      "name": "Component Migration",
+      "description": "Update React components to use new hooks and interfaces. This ensures the UI correctly displays data from the updated API structure.",
+      "priority": "MEDIUM",
+      "estimatedTime": "3 heurs",
+      "tasks": [
+        {
+          "id": "COMP-001",
+          "title": "Migrate component: AmodiataireDetailsPage",
+          "description": "Update to use new AmodiataireDetail interface structure. Update property access patterns and hook usage to match new API structure.",
+          "file": "src/components/organisms/AmodiataireDetailsPage.tsx",
+          "type": "REFACTOR",
+          "codeExample": {
+            "before": "// AmodiataireDetailsPage - Before migration\nconst { data: amodiataire } = useAmodiataireDetails(id);\n\n// Property access\n<Text>{amodiataire.raisonSociale}</Text>\n<Text>{amodiataire.adresse}</Text>",
+            "after": "// AmodiataireDetailsPage - After migration\nconst { data } = useAmodiataireDetail(id);\nconst amodiataire = data?.amodiataire;\n\n// Property access with new structure\n<Text>{amodiataire.lot.raisonSociale}</Text>\n<Text>{amodiataire.lot.adresse}</Text>"
+          },
+          "affectedComponents": [],
+          "testingNotes": "1. Update hook usage: const { data: amodiataire } = useAmodiataireDetails(id); → const { data } = useAmodiataireDetail(id);\nconst amodiataire = data?.amodiataire;\n2. Update property access:\n   - amodiataire.raisonSociale → amodiataire.lot.raisonSociale\n   - amodiataire.adresse → amodiataire.lot.adresse\n   - amodiataire.photos → amodiataire.media.images\n3. Test component renders correctly\n4. Test all user interactions work\n5. Test loading and error states\n6. Verify no TypeScript errors\n7. Test with real API data\n8. Check for any hardcoded assumptions about data structure"
+        },
+        {
+          "id": "COMP-002",
+          "title": "Migrate component: MediaGallery",
+          "description": "Update to use new MediaCollection interface structure. Update property access patterns and hook usage to match new API structure.",
+          "file": "src/components/molecules/MediaGallery.tsx",
+          "type": "REFACTOR",
+          "codeExample": {
+            "before": "// MediaGallery - Before migration\nphotos?.map(photo => ...)\n\n// Property access\n<Text>{photo (string URL)}</Text>\n<Text>{key={photo}}</Text>",
+            "after": "// MediaGallery - After migration\nmedia.images.map(image => ...)\n\n// Property access with new structure\n<Text>{image.url (MediaDetail object)}</Text>\n<Text>{key={image.id}}</Text>"
+          },
+          "affectedComponents": [],
+          "testingNotes": "1. Update hook usage: photos?.map(photo => ...) → media.images.map(image => ...)\n2. Update property access:\n   - photo (string URL) → image.url (MediaDetail object)\n   - key={photo} → key={image.id}\n3. Test component renders correctly\n4. Test all user interactions work\n5. Test loading and error states\n6. Verify no TypeScript errors\n7. Test with real API data\n8. Check for any hardcoded assumptions about data structure"
+        },
+        {
+          "id": "COMP-003",
+          "title": "Update components using deprecated hooks",
+          "description": "Search codebase for components using deprecated hooks and update them to use the new v2 hooks.",
+          "file": "src/components/**/*.tsx",
+          "type": "REFACTOR",
+          "codeExample": {
+            "before": "// Example: Old hook usage\nconst { data } = useAmodiatairesMinimal();\n\n// Accessing data\ndata?.map(item => ...)",
+            "after": "// Example: New hook usage with parameters\nconst { data } = useAmodiataires({ limit: 20, offset: 0 });\n\n// Accessing data from new structure\ndata?.amodiataires.map(item => ...)"
+          },
+          "affectedComponents": [
+            "All components using deprecated hooks"
+          ],
+          "testingNotes": "1. Search for deprecated hook usage: grep -r \"useAmodiatairesMinimal\\|useOldHook\" src/\n2. Update each component to use new hooks\n3. Update data access patterns for new response structures\n4. Test each updated component thoroughly\n5. Verify no console warnings about deprecated APIs"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "taskId": "COMP-003",
+      "dependsOn": [
+        "HOOK-005",
+        "HOOK-013",
+        "HOOK-016"
+      ],
+      "reason": "Component requires updated hooks and interfaces to be available"
+    }
+  ],
+  "validationTests": [
+    {
+      "name": "Route Constants Validation",
+      "description": "Verify all route constants are defined and return correct paths",
+      "type": "UNIT",
+      "file": "src/services/api/__tests__/routes.test.ts",
+      "code": "describe('ApiRoutes', () => {\n  it('should have all documented routes defined', () => {\n    // Test that all route constants exist\n    expect(ApiRoutes.PUBLIC_AMODIATAIRES_V2).toBeDefined();\n    expect(ApiRoutes.PUBLIC_AMODIATAIRES_V2).toBe('/api/mobile/public/amodiataires');\n  });\n});"
+    },
+    {
+      "name": "Interface Compilation Test",
+      "description": "Verify TypeScript compilation succeeds with updated interfaces",
+      "type": "UNIT",
+      "file": "src/types/__tests__/api.test.ts",
+      "code": "describe('API Interfaces', () => {\n  it('should compile without errors', () => {\n    const response: AmodiataireDetailResponse = {\n      success: true,\n      amodiataire: {} as AmodiataireDetail,\n    };\n    expect(response).toBeDefined();\n  });\n});"
+    },
+    {
+      "name": "Hook Integration Test",
+      "description": "Verify hooks work correctly with API",
+      "type": "INTEGRATION",
+      "file": "src/hooks/__tests__/useApi.integration.test.ts",
+      "code": "describe('API Hooks', () => {\n  it('should fetch data successfully', async () => {\n    const { result } = renderHook(() => useAmodiataires());\n    await waitFor(() => expect(result.current.isSuccess).toBe(true));\n    expect(result.current.data).toBeDefined();\n  });\n});"
+    }
+  ]
+}

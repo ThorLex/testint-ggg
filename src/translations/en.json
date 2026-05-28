@@ -1,0 +1,425 @@
+{
+    "app": {
+        "name": "Navipad",
+        "tagline": "Your navigation companion"
+    },
+    "calculator": {
+        "title": "Calculator",
+        "pickOrigin": "Origin",
+        "useCurrentLocation": "Use my current location",
+        "myLocation": "My location",
+        "selectOriginParcel": "Select a parcel as starting point",
+        "pickDestination": "Destination",
+        "selectDestParcel": "Select a destination parcel",
+        "availableRoutes": "{{count}} available routes",
+        "chooseRoute": "Choose a route",
+        "distance": "DISTANCE",
+        "route": "ROUTE",
+        "totalDistance": "Total Distance",
+        "via": "via {{summary}}",
+        "newCalculation": "New calculation",
+        "loading": "Loading..."
+    },
+    "history": {
+        "title": "Navigation History",
+        "empty": "No history available",
+        "loading": "Loading...",
+        "error": "Error loading history",
+        "retry": "Retry",
+        "driving": "Driving",
+        "walking": "Walking",
+        "transit": "Transit",
+        "bicycling": "Bicycling",
+        "distance": "Distance",
+        "duration": "Duration",
+        "minutes": "min",
+        "km": "km",
+        "resume": "Resume",
+        "date_today": "Today",
+        "date_yesterday": "Yesterday"
+    },
+    "common": {
+        "ok": "OK",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "close": "Close",
+        "save": "Save",
+        "delete": "Delete",
+        "edit": "Edit",
+        "search": "Search",
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "retry": "Retry",
+        "back": "Back",
+        "next": "Next",
+        "skip": "Skip",
+        "done": "Done"
+    },
+    "errors": {
+        "network": "Connection error. Check your internet connection.",
+        "server": "Server error. Please try again later.",
+        "unknown": "An unknown error occurred.",
+        "location_permission": "Location permission denied.",
+        "location_disabled": "Location services are disabled."
+    },
+    "permissions": {
+        "location_title": "Allow Location",
+        "location_message": "Navipad needs access to your location to show your position on the map and help you find nearby amodiataires.",
+        "location_button": "Allow Location",
+        "location_denied_title": "Permission Denied",
+        "location_denied_message": "To use location services, you need to allow access in the app settings.",
+        "location_disabled_title": "Location Services Disabled",
+        "location_disabled_message": "Location services are disabled on your device. Please enable them in system settings.",
+        "open_settings": "Open Settings",
+        "maybe_later": "Maybe Later",
+        "location_benefits": "This will allow you to:",
+        "benefit_1": "See your position on the map",
+        "benefit_2": "Find the nearest amodiataires",
+        "benefit_3": "Get precise directions",
+        "how_to_enable": "How to enable:",
+        "enable_instructions": "1. Tap \"Open Settings\"\n2. Find \"Location\" or \"Position\"\n3. Enable permission for Navipad"
+    },
+    "network": {
+        "offline_title": "Offline",
+        "offline_message": "You are currently offline. Some features may be limited.",
+        "connected_title": "Connection restored",
+        "connected_message": "You are now connected via {{type}}",
+        "disconnected_title": "Connection lost",
+        "disconnected_message": "Please check your internet connection",
+        "connection_changed_title": "Connection changed",
+        "connection_changed_message": "Now connected via {{type}}",
+        "connection_types": {
+            "wifi": "Wi-Fi",
+            "cellular": "Mobile data",
+            "ethernet": "Ethernet",
+            "bluetooth": "Bluetooth",
+            "unknown": "Unknown connection"
+        },
+        "status": {
+            "checking": "Checking...",
+            "online": "Online",
+            "offline": "Offline"
+        }
+    },
+    "tutorial": {
+        "welcome_title": "Welcome to Navipad",
+        "welcome_message": "Discover how to use the app",
+        "step1_title": "Explore the map",
+        "step1_message": "Navigate the map to discover amodiataires around you.",
+        "step2_title": "Search",
+        "step2_message": "Use the search bar to quickly find an amodiataire.",
+        "step3_title": "Details",
+        "step3_message": "Tap on a marker to see amodiataire details.",
+        "step4_title": "Your location",
+        "step4_message": "Tap the location button to center the map on your position.",
+        "get_started": "Get Started"
+    },
+    "map": {
+        "my_location": "My location",
+        "center_on_me": "Center on me",
+        "zoom_in": "Zoom in",
+        "zoom_out": "Zoom out",
+        "search_placeholder": "Search for point...",
+        "no_results": "No results found",
+        "loading": "Loading map...",
+        "loading_markers": "Loading markers...",
+        "zone_bounds": "Zone bounds",
+        "standard": "Standard",
+        "satellite": "Satellite",
+        "hybrid": "Hybrid",
+        "type": {
+            "standard": "Standard",
+            "satellite": "Satellite",
+            "hybrid": "Hybrid",
+            "android_auto": "Android Auto",
+            "carplay": "CarPlay",
+            "androidAutoSubtitle": "Dark driving mode",
+            "carplaySubtitle": "Light driving mode"
+        },
+        "error_title": "Loading error",
+        "error_generic": "An error occurred while loading data",
+        "error_timeout_title": "Timeout",
+        "error_timeout": "Connection took too long. Please try again.",
+        "error_network_title": "Network error",
+        "error_network": "Unable to connect to server. Check your internet connection.",
+        "error_data_title": "Invalid data",
+        "error_malformed": "Received data is incorrect. Please try again.",
+        "retry": "Retry"
+    },
+    "amodiataire": {
+        "details": "Details",
+        "contact": "Contact",
+        "phone": "Phone",
+        "email": "Email",
+        "address": "Address",
+        "photos": "Photos",
+        "videos": "Videos",
+        "documents": "Documents",
+        "no_photos": "No photos",
+        "no_videos": "No videos",
+        "no_documents": "No documents",
+        "service": "Service",
+        "services": "Services",
+        "status_active": "Active",
+        "status_inactive": "Inactive",
+        "status_suspended": "Suspended"
+    },
+    "search": {
+        "title": "Search",
+        "defaultPlaceholder": "Search...",
+        "loading": "Searching...",
+        "noResults": "No results found",
+        "error": "Search error",
+        "results": "{{count}} result(s)",
+        "recent": "Recent searches",
+        "clear_recent": "Clear history",
+        "clear_all": "Clear all",
+        "clear_item": "Remove",
+        "no_history": "No search history",
+        "history_cleared": "History cleared",
+        "item_removed": "Item removed",
+        "placeholder": {
+            "routes": "Search for a route...",
+            "announcements": "Search for an announcement...",
+            "services": "Search for a service..."
+        },
+        "types": {
+            "amodiataires": "Tenants/services",
+            "routes": "Routes"
+        }
+    },
+    "navigation": {
+        "login": "Login",
+        "profile": "Profile",
+        "list": "List",
+        "settings": "Settings",
+        "notifications": "Announcement"
+    },
+    "list": {
+        "title": "Amodiataires",
+        "count": "{{count}} amodiataires found",
+        "servicesCount": "{{count}} services found",
+        "loading": "Loading amodiataires...",
+        "loadingServices": "Loading services...",
+        "error": "Error loading data",
+        "empty": "No amodiataires found",
+        "emptyServices": "No services found",
+        "hasLocation": "Location available"
+    },
+    "login": {
+        "signIn": "Sign In",
+        "signUp": "Sign Up",
+        "welcomeBack": "Welcome Back!",
+        "welcomeSignUp": "Create Account",
+        "signInSubtitle": "Sign in to continue your experience",
+        "signUpSubtitle": "Join Navipad to access all features",
+        "email": "Email address",
+        "password": "Password",
+        "confirmPassword": "Confirm Password",
+        "passwordPlaceholder": "Your password",
+        "confirmPasswordPlaceholder": "Confirm your password",
+        "createAccount": "Create Account",
+        "alreadyHaveAccount": "Already have an account?",
+        "noAccount": "Don't have an account?",
+        "forgotPassword": "Forgot password?",
+        "error": "Error",
+        "success": "Success",
+        "fillFields": "Please fill all fields",
+        "emailRequired": "Email required",
+        "emailInvalid": "Invalid email",
+        "passwordRequired": "Password required",
+        "passwordTooShort": "Minimum 6 characters",
+        "passwordMismatch": "Passwords don't match",
+        "signUpSuccess": "Account created successfully",
+        "loginSuccess": "Login successful",
+        "genericError": "An error occurred",
+        "terms": "By creating an account, you agree to our Terms of Service and Privacy Policy."
+    },
+    "settings": {
+        "title": "Settings",
+        "appearance": "Appearance",
+        "theme": {
+            "light": "Light theme",
+            "dark": "Dark theme",
+            "auto": "Automatic",
+            "autoSubtitle": "Follow system"
+        },
+        "language": "Language",
+        "about": "About",
+        "version": "Version",
+        "logout": "Logout"
+    },
+    "lots": {
+        "selectTitle": "Select a lot",
+        "count": "{{count}} lots available",
+        "empty": "No lots available"
+    },
+    "amodiataireDetails": {
+        "defaultTitle": "Tenant/service",
+        "sections": {
+            "bibliography": "Biography",
+            "contact": "Contact",
+            "announcements": "Announcements",
+            "photos": "Photo(s)",
+            "sites": "Plot(s)"
+        },
+        "fields": {
+            "email": "Email",
+            "phone": "Phone",
+            "website": "Website",
+            "address": "Address"
+        },
+        "messages": {
+            "noSites": "No registered plots",
+            "loading": "Loading...",
+            "error": "Error loading"
+        }
+    },
+    "announcements": {
+        "detailsTitle": "Announcement Details",
+        "fields": {
+            "type": "Type",
+            "priority": "Priority",
+            "publishedOn": "Published on",
+            "validPeriod": "Valid",
+            "from": "from",
+            "to": "to",
+            "usefulLink": "🔗 Useful link",
+            "contact": "Contact"
+        },
+        "types": {
+            "nouvelle_route": "New route",
+            "maintenance": "Maintenance",
+            "info": "Information",
+            "urgence": "Emergency",
+            "amodiataire": "Tenant"
+        },
+        "priorities": {
+            "urgente": "🔴 Urgent",
+            "haute": "🟠 High",
+            "normale": "🟢 Normal"
+        },
+        "noAnnouncements": "No announcements"
+    },
+    "dashboard": {
+        "title": "My Space",
+        "profile": "Profile",
+        "photos": "Photos",
+        "videos": "Videos",
+        "documents": "Documents",
+        "profileInfo": "Profile Information",
+        "companyName": "Company Name",
+        "name": "Name",
+        "email": "Email",
+        "phone": "Phone",
+        "address": "Address",
+        "addMedia": "Add Media",
+        "actions": {
+            "addPhoto": "Add photo",
+            "addVideo": "Add video",
+            "addDocument": "Add document"
+        },
+        "deleteMedia": "Delete",
+        "deleteMediaConfirm": "Do you really want to delete this media?",
+        "delete": "Delete",
+        "logout": "Logout",
+        "logoutConfirm": "Do you really want to logout?",
+        "success": "Success",
+        "error": "Error",
+        "mediaDeleted": "Media deleted",
+        "deleteError": "Unable to delete media",
+        "featureComingSoon": "Feature coming soon",
+        "uploadSuccess": "Upload successful",
+        "uploadError": "Upload error",
+        "selectFromGallery": "Choose from gallery",
+        "takePhoto": "Take a photo",
+        "selectDocument": "Choose a document",
+        "uploading": "Uploading...",
+        "permissionRequired": "Permission required",
+        "cameraPermission": "Camera access permission required",
+        "galleryPermission": "Gallery access permission required",
+        "mediaPreview": "Media preview",
+        "videoPlayer": "Video player",
+        "playVideo": "Play video",
+        "pauseVideo": "Pause",
+        "muteVideo": "Mute",
+        "unmuteVideo": "Unmute",
+        "fullscreen": "Fullscreen",
+        "exitFullscreen": "Exit fullscreen"
+    },
+    "inAppNavigation": {
+        "remainingDistance": "Remaining distance",
+        "of": "of",
+        "arrival": "Arrival",
+        "elapsed": "Elapsed",
+        "then": "Then",
+        "walkingMode": "Walking mode",
+        "drivingMode": "Driving mode",
+        "meterPrecision": "Meter precision",
+        "time": {
+            "hours": "h",
+            "minutes": "min",
+            "seconds": "s"
+        },
+        "voice": {
+            "started": "Navigation started. Total distance: {{distance}}. Estimated duration: {{duration}}. Have a safe trip!",
+            "arrived": "You have arrived at your destination.",
+            "in": "In {{distance}}, {{instruction}}",
+            "remaining": "Remaining distance to destination: {{distance}}",
+            "almostThere": "Only {{distance}} left to destination",
+            "warnings": {
+                "school": "Caution, school nearby. Slow down.",
+                "trafficLight": "Traffic lights ahead.",
+                "crosswalk": "Slow down at the crosswalk.",
+                "roundabout": "Roundabout ahead.",
+                "toll": "Toll booth ahead. Prepare your payment."
+            }
+        }
+    },
+    "media": {
+        "noMedia": "No media",
+        "noPhotos": "No photos",
+        "noVideos": "No videos",
+        "noDocuments": "No documents"
+    },
+    "navigationModal": {
+        "title": "Navigation to",
+        "origin": "Your location",
+        "destination": "Destination",
+        "loading": "Calculating route...",
+        "noDestination": "No destination selected",
+        "fetchingPosition": "Getting your location...",
+        "noData": "Navigation data unavailable",
+        "start": "Start navigation",
+        "startTitle": "Start navigation",
+        "startMessage": "Would you like to open Google Maps for navigation?",
+        "openMaps": "Open Maps",
+        "inApp": "In-app navigation",
+        "inAppTitle": "In-app navigation",
+        "inAppMessage": "Feature in development",
+        "error": "Error",
+        "noLocation": "Unable to get your location",
+        "routeError": "Unable to load routes",
+        "mapsError": "Unable to open Google Maps"
+    },
+    "route": {
+        "status": {
+            "active": "Active",
+            "inactive": "Inactive",
+            "maintenance": "Maintenance"
+        },
+        "roadType": "Road Type",
+        "maxSpeed": "Max Speed",
+        "width": "Width",
+        "surface": "Surface",
+        "details": "Route Details",
+        "navigate": "Navigate to this route"
+    },
+    "notifications": {
+        "title": "Announcements",
+        "search": "Search announcements...",
+        "empty": "No announcements",
+        "noResults": "No announcements found"
+    }
+}
