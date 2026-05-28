@@ -1,75 +1,189 @@
-
-
-name: Build Navipad
+name: Build iOS (Expo, unsigned)
 
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
-  workflow_dispatch: # Permet lancement manuel
+  workflow_dispatch:
 
-# Évite les builds en doublon sur la même branche
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  # ──────────────────────────────────────────────
-  # Build iOS (macOS runner, sans signing)
-  # ──────────────────────────────────────────────
   build-ios:
     name: iOS Build (unsigned)
-    runs-on: macos-15 # Apple Silicon M2 runner (Xcode 16+)
+    runs-on: macos-15
     timeout-minutes: 60
-    steps:
-      - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: "20"
           cache: npm
 
-      - run: npm ci || npm install
+      - name: Install dependencies
+        run: npm ci || npm install
 
-      - name: Generate native iOS project
+      - name: Install Expo CLI
+        run: npm install -g expo-cli @expo/cli || true
+
+      - name: Expo prebuild (iOS)
         run: npx expo prebuild --platform ios --clean
 
       - name: Install CocoaPods
         run: cd ios && pod install
 
-      - name: Build iOS (unsigned)
+      - name: Install xcpretty
+        run: gem install xcpretty --no-document || sudo gem install xcpretty --no-document
+
+      - name: Detect Xcode workspace and scheme
         run: |
-          xcodebuild \
-            -workspace ios/Navipad.xcworkspace \
-            -scheme Navipad \
-            -configuration Release \
-            -sdk iphoneos \
-            -destination "generic/platform=iOS" \
-            -archivePath ${{ runner.temp }}/Navipad.xcarchive \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY="" \
-            PROVISIONING_PROFILE="" \
-            archive | xcpretty
-      - name: Package unsigned .ipa
-        run: |
-          APP_PATH=$(find ${{ runner.temp }}/Navipad.xcarchive -name "*.app" -type d | head -1)
-          if [ -n "$APP_PATH" ]; then
-            IPA_ROOT=${{ runner.temp }}/ipa-build
-            PAYLOAD_DIR=$IPA_ROOT/Payload
-            rm -rf "$IPA_ROOT"
-            mkdir -p "$PAYLOAD_DIR"
-            cp -R "$APP_PATH" "$PAYLOAD_DIR/"
-            cd "$IPA_ROOT"
-            zip -r ${{ runner.temp }}/navipad-unsigned-ios.ipa Payload
-          else
-            echo "No .app found in archive; cannot create .ipa"
+          set -eo pipefail
+
+          # 1) Workspace : on prend le premier .xcworkspace dans ios/
+          WORKSPACE=$(ls -d ios/*.xcworkspace 2>/dev/null | head -1)
+          if [ -z "$WORKSPACE" ]; then
+            echo "No .xcworkspace found in ios/ after Expo prebuild" >&2
+            ls -la ios/ >&2 || true
             exit 1
           fi
-      - name: Upload iOS artifact
+
+          # 2) Scheme : basename(workspace) par defaut (convention Expo/RN),
+          #    on verifie qu il existe vraiment dans xcodebuild -list.
+          DEFAULT_SCHEME=$(basename "$WORKSPACE" .xcworkspace)
+          LIST=$(xcodebuild -list -workspace "$WORKSPACE" 2>/dev/null || true)
+          echo "$LIST"
+
+          SCHEME=""
+          if echo "$LIST" | grep -qE "^[[:space:]]+${DEFAULT_SCHEME}[[:space:]]*$"; then
+            SCHEME="$DEFAULT_SCHEME"
+          else
+            # Fallback : 1er scheme buildable hors deps RN/Expo connues
+            SCHEME=$(echo "$LIST" \
+              | awk '/Schemes:/{flag=1; next} flag && NF{sub(/^[[:space:]]+/,""); print} flag && !NF{exit}' \
+              | grep -Ev "^(Pods-|hermes-engine|RCT-|React|Expo|FBLazyVector|FBReact|Yoga|glog|fmt|DoubleConversion|RNCAsyncStorage|boost|RCTRequired|RCTTypeSafety|.*Tests$)" \
+              | head -1 || true)
+          fi
+
+          if [ -z "$SCHEME" ]; then
+            echo "Could not determine a buildable scheme" >&2
+            echo "$LIST" >&2
+            exit 1
+          fi
+
+          echo "WORKSPACE=$WORKSPACE" >> "$GITHUB_ENV"
+          echo "SCHEME=$SCHEME" >> "$GITHUB_ENV"
+          echo "Using workspace=$WORKSPACE scheme=$SCHEME"
+
+      - name: Build iOS archive (unsigned)
+        run: |
+          set -eo pipefail
+          : "${WORKSPACE:?WORKSPACE not set}"
+          : "${SCHEME:?SCHEME not set}"
+
+          ARCHIVE="$RUNNER_TEMP/app.xcarchive"
+          LOG="$RUNNER_TEMP/xcodebuild.log"
+          rm -rf "$ARCHIVE"
+
+          # pipefail OFF autour de tee|xcpretty pour recuperer le vrai exit code
+          set +o pipefail
+          xcodebuild \
+            -workspace "$WORKSPACE" -scheme "$SCHEME" \
+            -configuration Release -sdk iphoneos \
+            -destination "generic/platform=iOS" \
+            -archivePath "$ARCHIVE" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" PROVISIONING_PROFILE="" \
+            archive 2>&1 | tee "$LOG" | xcpretty
+          XC_STATUS=${PIPESTATUS[0]}
+          set -o pipefail
+
+          if [ "$XC_STATUS" -ne 0 ]; then
+            echo "::group::xcodebuild last 120 lines"
+            tail -n 120 "$LOG" >&2
+            echo "::endgroup::"
+            echo "xcodebuild archive failed (exit $XC_STATUS)" >&2
+            exit 1
+          fi
+
+          test -d "$ARCHIVE" || { echo "archive not created" >&2; exit 1; }
+
+          # Le .app est toujours dans Products/Applications/
+          APP_PATH=$(find "$ARCHIVE/Products/Applications" -maxdepth 2 -name "*.app" -type d 2>/dev/null | head -1)
+          if [ -z "$APP_PATH" ]; then
+            echo "No .app in $ARCHIVE/Products/Applications" >&2
+            find "$ARCHIVE" -maxdepth 4 >&2
+            exit 1
+          fi
+
+          echo "APP_PATH=$APP_PATH" >> "$GITHUB_ENV"
+          echo "Found: $APP_PATH"
+
+      - name: Package unsigned .ipa
+        run: |
+          set -eo pipefail
+          : "${APP_PATH:?APP_PATH not set}"
+          test -d "$APP_PATH" || { echo "No .app at $APP_PATH" >&2; exit 1; }
+
+          IPA_ROOT="$RUNNER_TEMP/ipa-build"
+          rm -rf "$IPA_ROOT"
+          mkdir -p "$IPA_ROOT/Payload"
+          cp -R "$APP_PATH" "$IPA_ROOT/Payload/"
+          cd "$IPA_ROOT"
+          zip -qr "$RUNNER_TEMP/app-unsigned.ipa" Payload
+          ls -la "$RUNNER_TEMP/app-unsigned.ipa"
+
+      # ─────────────────────────────────────────────────────────────────
+      # ETAPES DESACTIVEES : necessitent des secrets / endpoints externes.
+      # Pour les reactiver :
+      #   1) Decommente les blocs ci-dessous.
+      #   2) Cree les secrets BUILD_TOKEN, API_BASE, BUILD_ID dans
+      #      Settings > Secrets and variables > Actions.
+      # ─────────────────────────────────────────────────────────────────
+      #
+      # - name: Load Catalyst env vars
+      #   run: |
+      #     curl -sf -H "Authorization: Bearer $BUILD_TOKEN" \
+      #       "$API_BASE/catalyst/api/ci/builds/$BUILD_ID/env-vars/?environment=production" \
+      #       | python3 -c "import json,sys; [print(f'{k}={v}') for k,v in json.load(sys.stdin).items()]" \
+      #       >> "$GITHUB_ENV"
+      #   env:
+      #     BUILD_TOKEN: ${{ secrets.BUILD_TOKEN }}
+      #     API_BASE: ${{ secrets.API_BASE }}
+      #     BUILD_ID: ${{ secrets.BUILD_ID }}
+      #
+      # - name: Upload artifact to Catalyst
+      #   run: |
+      #     curl -sSf --fail-with-body \
+      #       --retry 3 --retry-delay 5 --retry-connrefused \
+      #       --connect-timeout 30 --max-time 600 \
+      #       -X POST -H "Authorization: Bearer $BUILD_TOKEN" \
+      #       -F "file=@$RUNNER_TEMP/app-unsigned.ipa" \
+      #       -F "build_id=$BUILD_ID" \
+      #       "$API_BASE/catalyst/api/ci/artifacts/upload/"
+      #   env:
+      #     BUILD_TOKEN: ${{ secrets.BUILD_TOKEN }}
+      #     API_BASE: ${{ secrets.API_BASE }}
+      #     BUILD_ID: ${{ secrets.BUILD_ID }}
+
+      - name: Upload IPA as GitHub artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: navipad-ios-unsigned
-          path: ${{ runner.temp }}/navipad-unsigned-ios.ipa
+          name: ios-unsigned-ipa
+          path: ${{ runner.temp }}/app-unsigned.ipa
           retention-days: 14
+
+      - name: Upload xcodebuild log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xcodebuild-log
+          path: ${{ runner.temp }}/xcodebuild.log
+          retention-days: 7
